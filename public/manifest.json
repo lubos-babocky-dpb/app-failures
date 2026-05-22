@@ -1,0 +1,14 @@
+{
+    "name": "DPB - Hlásenie porúch",
+    "short_name": "Poruchy",
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#dc2626",
+    "icons": [
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
