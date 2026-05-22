@@ -12,7 +12,10 @@ use Illuminate\Support\Str;
 
 class FailureReportController extends Controller
 {
-    public function __invoke(Request $request): JsonResponse
+    /**
+     * Endpoint for receiving offline reports submitted by drivers.
+     */
+    public function store(Request $request): JsonResponse
     {
         // Validate incoming payload from the PWA application
         $validated = $request->validate([
@@ -53,7 +56,8 @@ class FailureReportController extends Controller
             'category_id' => $validated['category_id'],
             'note' => $validated['note'],
             'photo_path' => $photoPath,
-            'client_created_at' => $validated['created_at']
+            'client_created_at' => $validated['created_at'],
+            'status' => 'odoslané'
         ]);
 
         // Return standard response with the actual database primary key
@@ -62,5 +66,21 @@ class FailureReportController extends Controller
             'message' => 'Failure report synchronized and saved.',
             'id' => $failure->id
         ], 201);
+    }
+
+    /**
+     * Get current statuses of all failures for a specific device.
+     */
+    public function checkStatuses(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'user_uuid' => 'required|uuid',
+        ]);
+
+        $failures = VehicleFailure::query()
+            ->where(column: 'user_uuid', operator: '=', value: $validated['user_uuid'], boolean: 'and')
+            ->get(['id', 'status']);
+
+        return response()->json($failures);
     }
 }

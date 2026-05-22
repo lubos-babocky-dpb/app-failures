@@ -3,7 +3,7 @@ import { ref, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Html5Qrcode } from 'html5-qrcode';
 import { db } from '../db';
-import { syncPendingFailures } from '../sync'; // Ensure this named import is present
+import { syncPendingFailures } from '../sync';
 
 const { t } = useI18n();
 
@@ -73,7 +73,6 @@ const startQrScanner = async () => {
         } catch (err) {
             console.error(err);
             stopQrScanner();
-            alert('Camera access denied or error occurred.');
         }
     }, 50);
 };
@@ -108,7 +107,7 @@ const handleVehicleSelection = async (scannedId) => {
 const openCategoryPicker = async () => {
     // Prevent opening if no vehicle is scanned or if the active vehicle has an error state
     if (!vehicleId.value || (vehicleData.value && vehicleData.value.error)) {
-        categoryError.value = '⚠ NAJSKÔR NASKENUJTE VOZIDLO!';
+        categoryError.value = t('report.error_scan_first');
         if (errorTimeout) clearTimeout(errorTimeout);
         errorTimeout = setTimeout(() => categoryError.value = '', 3000);
         return;
@@ -131,7 +130,6 @@ const openCategoryPicker = async () => {
         isCategoryModalOpen.value = true;
     } catch (error) {
         console.error('Failed to query local failure categories:', error);
-        alert('Could not open failure categories from offline database.');
     }
 };
 
@@ -201,7 +199,6 @@ const submitReport = async () => {
 
     } catch (error) {
         console.error('Failed to process form submission sequence:', error);
-        alert('Error saving report.');
     } finally {
         isSubmitting.value = false;
     }
@@ -229,11 +226,11 @@ onUnmounted(() => {
             ✓
         </div>
         <div class="text-center space-y-2">
-            <h2 class="text-2xl font-black uppercase text-slate-800">Hlásenie prijaté</h2>
-            <p class="text-slate-500 font-medium">Porucha bola úspešne zaznamenaná do systému.</p>
+            <h2 class="text-2xl font-black uppercase text-slate-800">{{ t('report.accepted') }}</h2>
+            <p class="text-slate-500 font-medium">{{ t('report.success_sub') }}</p>
         </div>
         <button type="button" @click="resetForm" class="px-8 py-4 bg-slate-800 text-white font-bold rounded-2xl uppercase tracking-widest text-sm transition-transform active:scale-95">
-            Nové hlásenie
+            {{ t('nav.new_report') }}
         </button>
     </div>
 
@@ -245,13 +242,12 @@ onUnmounted(() => {
             class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 transition-colors flex flex-col min-h-[140px]"
         >
             <div v-if="vehicleData" class="flex-1 flex flex-col justify-center min-h-[110px] mb-3">
-                <div v-if="vehicleData.loading" class="text-lg font-bold text-slate-400 uppercase tracking-wide">Hľadám...</div>
+                <div v-if="vehicleData.loading" class="text-lg font-bold text-slate-400 uppercase tracking-wide">...</div>
                 <div v-else-if="vehicleData.error" class="flex flex-col justify-center">
                     <div class="flex justify-between items-baseline w-full">
                         <div class="text-5xl font-black text-slate-900 leading-none tracking-tight">{{ vehicleData.code }}</div>
-                        <div class="text-xl font-black text-[#e30613] uppercase leading-none text-right pl-2">Neznáme vozidlo</div>
+                        <div class="text-xl font-black text-[#e30613] uppercase leading-none text-right pl-2">{{ t('report.unknown_vehicle') }}</div>
                     </div>
-                    <div class="text-lg font-bold text-slate-400 uppercase tracking-wide mt-2">Dáta nenájdené</div>
                 </div>
                 <div v-else class="flex flex-col justify-center">
                     <div class="flex justify-between items-baseline w-full">
@@ -269,7 +265,7 @@ onUnmounted(() => {
                     :class="[vehicleData && !vehicleData.error ? 'bg-slate-100 text-slate-500 border border-slate-200 active:bg-slate-200' : 'bg-[#e30613] text-white border border-slate-300 active:bg-[#c40510]']"
                     class="w-full text-center text-lg font-black uppercase tracking-wide py-4 rounded-2xl transition-colors shadow-sm"
                 >
-                    {{ vehicleData ? (vehicleData.error ? 'Načítať vozidlo znova' : 'Zmeniť vozidlo') : 'Načítať vozidlo' }}
+                    {{ vehicleData ? t('report.load_again') : t('report.select_vehicle') }}
                 </button>
             </div>
         </div>
@@ -281,13 +277,13 @@ onUnmounted(() => {
                 class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 transition-opacity duration-300"
             >
                 <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                    Popis poruchy / Kategória
+                    {{ t('report.description') }}
                 </label>
                 <div 
                     :class="[selectedFailure ? 'bg-slate-100 text-slate-800 border border-slate-200 active:bg-slate-200 normal-case' : 'bg-[#e30613] text-white border border-slate-300 active:bg-[#c40510] uppercase']"
                     class="w-full text-center text-lg font-black tracking-wide py-4 rounded-2xl transition-colors shadow-sm"
                 >
-                    {{ selectedFailure ? selectedFailure.displayName : 'Vybrať poruchu' }}
+                    {{ selectedFailure ? selectedFailure.displayName : t('report.select_failure_btn') }}
                 </div>
             </div>
 
@@ -304,7 +300,7 @@ onUnmounted(() => {
                 v-model="note" 
                 rows="2"
                 class="w-full p-5 bg-white rounded-3xl border border-slate-200 shadow-sm focus:outline-none font-medium text-slate-700"
-                placeholder="Nepovinná poznámka..."
+                :placeholder="t('report.placeholder')"
             ></textarea>
 
             <div class="relative">
@@ -324,7 +320,7 @@ onUnmounted(() => {
                     class="w-full p-4 rounded-2xl border-2 border-dashed border-slate-300 text-slate-400 flex items-center justify-center space-x-2 active:bg-slate-50"
                 >
                     <span>📸</span>
-                    <span class="text-[10px] font-black uppercase tracking-widest">Pridať foto (nepovinné)</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest">{{ t('report.add_photo') }}</span>
                 </button>
 
                 <div v-else class="relative w-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
@@ -347,7 +343,7 @@ onUnmounted(() => {
             :class="[isSubmitting ? 'opacity-70' : '']"
             class="w-full py-5 bg-[#e30613] text-white font-black text-xl rounded-3xl shadow-xl active:scale-[0.97] transition-all uppercase tracking-widest"
         >
-            {{ isSubmitting ? 'ODOSIELAM...' : 'Odoslať' }}
+            {{ isSubmitting ? '...' : t('report.submit') }}
         </button>
 
         <div v-if="isQrModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
@@ -360,15 +356,12 @@ onUnmounted(() => {
                 >
                     ✕
                 </button>
-                <div class="p-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    Namierte na QR kód vozidla
-                </div>
             </div>
         </div>
 
         <div v-if="isCategoryModalOpen" class="fixed inset-0 z-[60] bg-white p-4 flex flex-col overflow-hidden">
             <div class="flex justify-between items-center pb-4 mb-4 border-b-4 border-[#e30613] shrink-0">
-                <h2 class="text-slate-900 text-2xl font-black uppercase tracking-wide">Výber poruchy</h2>
+                <h2 class="text-slate-900 text-2xl font-black uppercase tracking-wide">{{ t('report.modal_title') }}</h2>
                 <button 
                     type="button" 
                     @click="isCategoryModalOpen = false" 
@@ -398,7 +391,7 @@ onUnmounted(() => {
                         @click="currentSubcategories = []" 
                         class="w-full p-5 text-xl font-black uppercase tracking-wide bg-[#e30613] text-white rounded-2xl mb-2 active:bg-[#c40510] shadow-md shrink-0"
                     >
-                        ← SPÄŤ NA KATEGÓRIE
+                        {{ t('report.back') }}
                     </button>
                     <button 
                         v-for="sub in currentSubcategories" 
@@ -418,7 +411,7 @@ onUnmounted(() => {
                         @click="currentFailures = []" 
                         class="w-full p-5 text-xl font-black uppercase tracking-wide bg-[#e30613] text-white rounded-2xl mb-2 active:bg-[#c40510] shadow-md shrink-0 leading-tight"
                     >
-                        ← SPÄŤ NA {{ activeCategoryName }}
+                        {{ t('report.back') }}
                     </button>
                     <button 
                         v-for="fail in currentFailures" 

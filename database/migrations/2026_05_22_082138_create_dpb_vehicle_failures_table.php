@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('dpb_vehicle_failures', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('vehicle_id'); // Reference to the vehicles table
-            $table->uuid('user_uuid');                // Reference to the user UUID
-            $table->string('category_id');            // Reference to the subcategory ID string (e.g., "01_kabina")
-            $table->text('note')->nullable();         // Optional driver notes
-            $table->string('photo_path')->nullable(); // Path to the stored photo file
-            $table->timestamp('client_created_at');   // Exact time when the driver created the report offline
-            $table->timestamps();                     // Laravel standard created_at and updated_at
+            $table->unsignedBigInteger('vehicle_id');       // Reference to the vehicles table
+            $table->uuid('user_uuid');                      // Reference to the user UUID
+            $table->string('category_id');                  // Reference to the subcategory ID string (e.g., "01_kabina")
+            $table->text('note')->nullable();               // Optional driver notes
+            $table->string('photo_path')->nullable();       // Path to the stored photo file
+            $table->string('status')->default('odoslané');  // Aktuálny stav porúch (odoslané, v riešení, vyriešené...)
+            $table->timestamp('client_created_at');         // Exact time when the driver created the report offline
+            $table->timestamps();                           // Laravel standard created_at and updated_at
         });
     }
 

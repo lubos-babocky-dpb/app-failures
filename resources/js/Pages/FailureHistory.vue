@@ -1,18 +1,21 @@
 <script setup>
 import { ref, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { liveQuery } from 'dexie';
 import { db } from '../db';
 
+const { t, locale } = useI18n();
 const reports = ref([]);
 const isLoading = ref(true);
 
 /**
- * Formats a standardized ISO date string into Slovak localization layout.
+ * Formats a standardized ISO date string into locale layout.
  */
 const formatDate = (dateString) => {
     if (!dateString) return '';
     const d = new Date(dateString);
-    return d.toLocaleDateString('sk-SK') + ' ' + d.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+    const currentLocale = locale.value === 'sk' ? 'sk-SK' : (locale.value === 'ru' ? 'ru-RU' : 'en-US');
+    return d.toLocaleDateString(currentLocale) + ' ' + d.toLocaleTimeString(currentLocale, { hour: '2-digit', minute: '2-digit' });
 };
 
 /**
@@ -28,13 +31,13 @@ const getTruncatedNote = (note) => {
  */
 const getStatusBadge = (status) => {
     const statusMap = {
-        'pending_sync': { text: 'Čaká na sieť', color: 'text-amber-600 animate-pulse' },
-        'synced': { text: 'Odoslané', color: 'text-green-600' },
-        'reported': { text: 'Nahlásené', color: 'text-[#e30613]' },
-        'accepted': { text: 'Prijaté', color: 'text-blue-600' },
-        'resolved': { text: 'Vyriešené', color: 'text-gray-500' }
+        'pending_sync': { text: t('status.pending_sync'), color: 'text-amber-600 animate-pulse' },
+        'synced': { text: t('status.synced'), color: 'text-green-600' },
+        'reported': { text: t('status.reported'), color: 'text-[#e30613]' },
+        'accepted': { text: t('status.accepted'), color: 'text-blue-600' },
+        'resolved': { text: t('status.resolved'), color: 'text-gray-500' }
     };
-    return statusMap[status] || { text: 'Nahlásené', color: 'text-[#e30613]' };
+    return statusMap[status] || { text: t('status.reported'), color: 'text-[#e30613]' };
 };
 
 // Create a real-time reactive database subscription using Dexie liveQuery
@@ -69,19 +72,19 @@ onUnmounted(() => {
 <template>
     <div class="space-y-6">
         <div class="flex justify-between items-center mb-6 pb-2 border-b-2 border-slate-200">
-            <h2 class="text-3xl font-black uppercase text-slate-900 tracking-tight">História hlásení</h2>
+            <h2 class="text-3xl font-black uppercase text-slate-900 tracking-tight">{{ t('history.title') }}</h2>
             <span class="bg-slate-900 text-white px-4 py-2 rounded-2xl text-lg font-black">
                 {{ reports.length }}
             </span>
         </div>
 
         <div v-if="isLoading" class="py-10 text-center text-sm font-black text-slate-400 uppercase tracking-widest">
-            Načítavam históriu...
+            {{ t('history.loading') }}
         </div>
 
         <div v-else-if="reports.length === 0" class="py-20 text-center">
             <div class="text-slate-300 text-6xl mb-4">📋</div>
-            <p class="text-slate-500 font-black uppercase text-sm tracking-wide">Žiadne nahlásené poruchy</p>
+            <p class="text-slate-500 font-black uppercase text-sm tracking-wide">{{ t('history.empty') }}</p>
         </div>
 
         <div v-else class="space-y-4">
@@ -98,7 +101,7 @@ onUnmounted(() => {
                         alt="Porucha"
                     >
                     <div v-else class="text-xs font-black text-slate-300 uppercase text-center p-1 leading-tight">
-                        Bez<br>fotky
+                        {{ t('history.no_photo') }}
                     </div>
                 </div>
                 
@@ -109,7 +112,7 @@ onUnmounted(() => {
                                 {{ report.vehicleCode }}
                             </span>
                             <span class="text-[#e30613] font-black text-base uppercase mt-1">
-                                Kód: {{ report.category_id }}
+                                {{ t('history.code_label') }}: {{ report.category_id }}
                             </span>
                         </div>
                         
@@ -125,7 +128,7 @@ onUnmounted(() => {
 
                     <div class="text-slate-700 text-sm font-bold min-w-0 w-full mt-1">
                         <span v-if="report.note">{{ getTruncatedNote(report.note) }}</span>
-                        <span v-else class="italic opacity-40">Bez poznámky</span>
+                        <span v-else class="italic opacity-40">{{ t('history.no_note') }}</span>
                     </div>
                 </div>
             </div>

@@ -1,27 +1,39 @@
 <script setup>
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter, useRoute } from 'vue-router';
+    import { ref, onMounted, watch } from 'vue'; // PRIDANÝ WATCH SEM
+    import { useI18n } from 'vue-i18n';
+    import { useRouter, useRoute } from 'vue-router';
+    import { syncStaticData, syncPendingFailures, syncFailureStatuses } from './sync';
 
-const { t, locale } = useI18n();
-const router = useRouter();
-const route = useRoute();
+    const { t, locale } = useI18n();
+    const router = useRouter();
+    const route = useRoute();
 
-const isMenuOpen = ref(false);
+    const isMenuOpen = ref(false);
 
-const navigationItems = [
-    { id: '/', labelKey: 'nav.new_report', icon: 'M12 4v16m8-8H4' },
-    { id: '/history', labelKey: 'nav.history', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' }
-];
+    // Sledovanie zmeny jazyka a ukladanie do localStorage
+    watch(locale, (newLocale) => {
+        localStorage.setItem('dpb_locale', newLocale);
+    });
 
-const toggleMenu = (status) => {
-    isMenuOpen.value = status;
-};
+    const navigationItems = [
+        { id: '/', labelKey: 'nav.new_report', icon: 'M12 4v16m8-8H4' },
+        { id: '/history', labelKey: 'nav.history', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' }
+    ];
 
-const navigateTo = (path) => {
-    router.push(path);
-    toggleMenu(false);
-};
+    const toggleMenu = (status) => {
+        isMenuOpen.value = status;
+    };
+
+    const navigateTo = (path) => {
+        router.push(path);
+        toggleMenu(false);
+    };
+
+    onMounted(async () => {
+        await syncStaticData();
+        await syncPendingFailures();
+        await syncFailureStatuses();
+    });
 </script>
 
 <template>

@@ -99,3 +99,60 @@ export const syncPendingFailures = async () => {
     
     console.log('[DEBUG-SYNC] <<< syncPendingFailures() finished');
 };
+
+/**
+ * Pulls current failure statuses from the server and updates or cleans local IndexedDB.
+ */
+export const syncFailureStatuses = async () => {
+    if (!navigator.onLine) return;
+
+    const deviceUuid = localStorage.getItem('dpb_user_uuid');
+    if (!deviceUuid) return;
+
+    try {
+        console.log('[DEBUG-SYNC] Fetching current statuses from server...');
+        const response = await fetch(`/api/v1/failures/statuses?user_uuid=${deviceUuid}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const serverFailures = await response.json(); // [{id: 1, status: "odoslané"}]
+
+            // Ak bol spustený migrate:fresh (server je prázdny), premažeme lokálne zosynchronizované poruchy
+            if (serverFailures.length === 0) {
+                // Vymažeme iba tie, ktoré už boli odoslané (status 'synced'), neodpalujeme vodičovi rozpísané 'pending_sync'
+                await db.failures.where('status').equals('synced').delete();
+                console.log('[DEBUG-SYNC] Server DB is empty. Cleared all local "synced" records.');
+                return;
+            }
+
+            const serverIds = serverFailures.map(f => f.id);
+            const localFailures = await db.failures.toArray();
+
+            for (const localFailure of localFailures) {
+                // Sledujeme iba úspešne odoslané veci, tie ktoré čakajú na sync preskakujeme
+                if (localFailure.status === 'pending_sync') continue;
+
+                // Ak záznam na serveri už neexistuje, zmažeme ho aj z IndexedDB
+                if (!serverIds.includes(localFailure.id)) {
+                    await db.failures.delete(localFailure.id);
+                    console.log(`[DEBUG-SYNC] Deleted orphaned local record ID: ${localFailure.id}`);
+                    continue;
+                }
+
+                // Ak na serveri existuje, aktualizujeme stav podľa dispečera (v riešení, vyriešené...)
+                const serverRecord = serverFailures.find(f => f.id === localFailure.id);
+                if (serverRecord && localFailure.status !== serverRecord.status) {
+                    await db.failures.update(localFailure.id, { status: serverRecord.status });
+                    console.log(`[DEBUG-SYNC] Record ID ${localFailure.id} status updated to: ${serverRecord.status}`);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('[DEBUG-SYNC] Error during failure statuses sync:', error);
+    }
+};

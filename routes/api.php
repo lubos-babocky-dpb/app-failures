@@ -16,16 +16,18 @@ Route::prefix('v1')->group(function () {
         Route::get('/vehicles', VehicleSyncController::class);
         Route::get('/categories', FailureCategoryController::class);
     });
-    // Endpoint for receiving offline reports submitted by drivers
-    Route::post('/failures/store', FailureReportController::class);
+    
+    // Endpoints for vehicle failures
+    Route::post('/failures/store', [FailureReportController::class, 'store']);
+    Route::get('/failures/statuses', [FailureReportController::class, 'checkStatuses']);
     Route::post('/user/handshake', UserHandshakeController::class);
 });
 
 Route::get('v1/data', fn() => response()->json([
     'status' => 'success',
-        'message' => 'Dáta boli úspešne načítané',
-        'payload' => [
-            'id' => 1,
-            'name' => 'Momo'
-        ]
+    'message' => 'Dáta boli úspešne načítané',
+    'payload' => [
+        'id' => 1,
+        'name' => 'Momo'
+    ]
 ]));
