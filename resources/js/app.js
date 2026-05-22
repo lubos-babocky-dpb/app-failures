@@ -4,6 +4,7 @@ import router from './router';
 import { i18n } from './i18n';
 import { initUserIdentity } from './userAuth'; // 1. Pridaný import
 import { syncStaticData, syncPendingFailures } from './sync';
+import { registerSW } from 'virtual:pwa-register';
 
 // Run initial synchronization routines on application bootstrap
 initUserIdentity().then(() => { // 2. Obalenie štartu identitou
@@ -23,3 +24,15 @@ const app = createApp(App);
 app.use(router);
 app.use(i18n);
 app.mount('#app');
+
+if ('serviceWorker' in navigator) {
+    registerSW({
+        immediate: true,
+        onNeedRefresh() {
+            console.log('[PWA] Nová verzia je k dispozícii.');
+        },
+        onOfflineReady() {
+            console.log('[PWA] Aplikácia je pripravená na offline beh.');
+        }
+    });
+}
