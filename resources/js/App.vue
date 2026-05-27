@@ -30,9 +30,13 @@
     };
 
     onMounted(async () => {
-        await syncStaticData();
-        await syncPendingFailures();
-        await syncFailureStatuses();
+        try {
+            await syncStaticData();
+            await syncPendingFailures();
+            await syncFailureStatuses();
+        } catch (error) {
+            console.warn('Inicializačná synchronizácia zlyhala (pravdepodobne offline režim):', error);
+        }
     });
 </script>
 

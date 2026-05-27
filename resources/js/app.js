@@ -6,6 +6,18 @@ import { initUserIdentity } from './userAuth'; // 1. Pridaný import
 import { syncStaticData, syncPendingFailures } from './sync';
 import { registerSW } from 'virtual:pwa-register';
 
+if ('serviceWorker' in navigator) {
+    registerSW({
+        immediate: true,
+        onNeedRefresh() {
+            console.log('[PWA] Nová verzia je k dispozícii.');
+        },
+        onOfflineReady() {
+            console.log('[PWA] Aplikácia je pripravená na offline beh.');
+        }
+    });
+}
+
 // Run initial synchronization routines on application bootstrap
 initUserIdentity().then(() => { // 2. Obalenie štartu identitou
     syncStaticData().then(() => {
@@ -24,15 +36,3 @@ const app = createApp(App);
 app.use(router);
 app.use(i18n);
 app.mount('#app');
-
-if ('serviceWorker' in navigator) {
-    registerSW({
-        immediate: true,
-        onNeedRefresh() {
-            console.log('[PWA] Nová verzia je k dispozícii.');
-        },
-        onOfflineReady() {
-            console.log('[PWA] Aplikácia je pripravená na offline beh.');
-        }
-    });
-}
