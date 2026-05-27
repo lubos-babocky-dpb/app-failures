@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('dpb_vehicle_failures', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();                 // Added: Unique sync key for PWA mapping
             $table->unsignedBigInteger('vehicle_id');       // Reference to the vehicles table
             $table->uuid('user_uuid');                      // Reference to the user UUID
             $table->string('category_id');                  // Reference to the subcategory ID string (e.g., "01_kabina")

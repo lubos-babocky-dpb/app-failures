@@ -177,10 +177,11 @@ const submitReport = async () => {
     try {
         // 1. Explicitly await the local IndexedDB write operation first
         await db.failures.add({
+            uuid: crypto.randomUUID(), // Injected: Required primary key value for IndexedDB schema
             vehicle_id: Number(vehicleId.value) || vehicleId.value,
             category_id: selectedFailure.value.code,
             note: note.value,
-            photo: photoPreview.value || null,
+            photo_path: photoPreview.value || null, // Renamed payload field to match photo_path column definition
             status: 'pending_sync',
             created_at: new Date().toISOString()
         });

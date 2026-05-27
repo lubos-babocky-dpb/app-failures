@@ -7,6 +7,6 @@ export const db = new Dexie('DPB_Poruchy');
 db.version(1).stores({
     vehicles: 'id',
     failure_categories: 'id',
-    failures: '++id, vehicle_id, category_id, status, created_at',
+    failures: 'uuid, vehicle_id, category_id, status, created_at',
     app_config: 'key'
 });

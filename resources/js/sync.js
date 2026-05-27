@@ -5,6 +5,12 @@ import { db } from './db';
  * This guarantees full offline accessibility for the PWA form.
  */
 export const syncStaticData = async () => {
+    // Check connectivity layout before executing fetch request streams
+    if (!navigator.onLine) {
+        console.log('Device is offline. Skipping static data synchronization.');
+        return;
+    }
+
     try {
         console.log('Starting data synchronization...');
 
@@ -39,6 +45,13 @@ export const syncStaticData = async () => {
 export const syncPendingFailures = async () => {
     console.log('[DEBUG-SYNC] >>> syncPendingFailures() triggered');
     
+    // Check connectivity layout before parsing structural queues
+    if (!navigator.onLine) {
+        console.log('[DEBUG-SYNC] Device is offline. Postponing report upload.');
+        console.log('[DEBUG-SYNC] <<< syncPendingFailures() finished');
+        return;
+    }
+
     // Add a slight delay to ensure Dexie internal write transactions are fully closed
     await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -61,8 +74,14 @@ export const syncPendingFailures = async () => {
         const deviceUuid = localStorage.getItem('dpb_user_uuid');
 
         for (const failure of pendingFailures) {
-            console.log(`[DEBUG-SYNC] Attempting to POST record ID: ${failure.id} to server...`);
+            console.log(`[DEBUG-SYNC] Attempting to POST record UUID: ${failure.uuid} to server...`);
             
+            // Re-verify connection layout mid-loop execution parameters
+            if (!navigator.onLine) {
+                console.warn('[DEBUG-SYNC] Network lost during synchronization loop. Aborting remainder.');
+                break;
+            }
+
             const response = await fetch('/api/v1/failures/store', {
                 method: 'POST',
                 headers: {
@@ -71,30 +90,34 @@ export const syncPendingFailures = async () => {
                     'X-User-UUID': deviceUuid
                 },
                 body: JSON.stringify({
+                    uuid: failure.uuid,
                     vehicle_id: failure.vehicle_id,
+                    user_uuid: deviceUuid,
                     category_id: failure.category_id,
                     note: failure.note,
-                    photo: failure.photo,
-                    created_at: failure.created_at,
-                    user_uuid: deviceUuid
+                    photo_path: failure.photo_path,
+                    client_created_at: failure.created_at
                 })
             });
 
-            console.log(`[DEBUG-SYNC] Server response status for ID ${failure.id}:`, response.status);
+            console.log(`[DEBUG-SYNC] Server response status for UUID ${failure.uuid}:`, response.status);
 
             if (response.ok) {
-                const result = await response.json();
-                console.log(`[DEBUG-SYNC] Success! Server returned ID: ${result.id}. Updating local DB status to "synced"...`);
-                
-                const updateCount = await db.failures.update(failure.id, { status: 'synced' });
+                console.log(`[DEBUG-SYNC] Success! Server acknowledged report. Updating local DB status to "synced"...`);
+                const updateCount = await db.failures.update(failure.uuid, { status: 'synced' });
                 console.log(`[DEBUG-SYNC] Local DB update confirmed. Rows affected: ${updateCount}`);
             } else {
                 const errorText = await response.text();
-                console.error(`[DEBUG-SYNC] Server rejected record ID ${failure.id}. Response:`, errorText);
+                console.error(`[DEBUG-SYNC] Server rejected record UUID ${failure.uuid}. Response:`, errorText);
             }
         }
     } catch (error) {
-        console.error('[DEBUG-SYNC] FATAL ERROR during synchronization loop:', error);
+        // Demote execution thread errors to warning logging upon basic fetch layer faults
+        if (error.name === 'TypeError' || error.message.includes('fetch')) {
+            console.warn('[DEBUG-SYNC] Network connectivity issues during sync loop:', error.message);
+        } else {
+            console.error('[DEBUG-SYNC] Real unexpected error during synchronization loop:', error);
+        }
     }
     
     console.log('[DEBUG-SYNC] <<< syncPendingFailures() finished');
@@ -120,35 +143,34 @@ export const syncFailureStatuses = async () => {
         });
 
         if (response.ok) {
-            const serverFailures = await response.json(); // [{id: 1, status: "odoslané"}]
+            const serverFailures = await response.json(); // Expected payload structure: [{uuid: "...", status: "reported"}]
 
-            // Ak bol spustený migrate:fresh (server je prázdny), premažeme lokálne zosynchronizované poruchy
+            // If remote DB was cleared, wipe all local synced entries
             if (serverFailures.length === 0) {
-                // Vymažeme iba tie, ktoré už boli odoslané (status 'synced'), neodpalujeme vodičovi rozpísané 'pending_sync'
                 await db.failures.where('status').equals('synced').delete();
                 console.log('[DEBUG-SYNC] Server DB is empty. Cleared all local "synced" records.');
                 return;
             }
 
-            const serverIds = serverFailures.map(f => f.id);
+            const serverUuids = serverFailures.map(f => f.uuid);
             const localFailures = await db.failures.toArray();
 
             for (const localFailure of localFailures) {
-                // Sledujeme iba úspešne odoslané veci, tie ktoré čakajú na sync preskakujeme
+                // Keep local unsynced drafts untouched
                 if (localFailure.status === 'pending_sync') continue;
 
-                // Ak záznam na serveri už neexistuje, zmažeme ho aj z IndexedDB
-                if (!serverIds.includes(localFailure.id)) {
-                    await db.failures.delete(localFailure.id);
-                    console.log(`[DEBUG-SYNC] Deleted orphaned local record ID: ${localFailure.id}`);
+                // Delete local record directly using uuid if it no longer exists on the server
+                if (!serverUuids.includes(localFailure.uuid)) {
+                    await db.failures.delete(localFailure.uuid); 
+                    console.log(`[DEBUG-SYNC] Deleted orphaned local record UUID: ${localFailure.uuid}`);
                     continue;
                 }
 
-                // Ak na serveri existuje, aktualizujeme stav podľa dispečera (v riešení, vyriešené...)
-                const serverRecord = serverFailures.find(f => f.id === localFailure.id);
+                // Update local life-cycle status using uuid match
+                const serverRecord = serverFailures.find(f => f.uuid === localFailure.uuid);
                 if (serverRecord && localFailure.status !== serverRecord.status) {
-                    await db.failures.update(localFailure.id, { status: serverRecord.status });
-                    console.log(`[DEBUG-SYNC] Record ID ${localFailure.id} status updated to: ${serverRecord.status}`);
+                    await db.failures.update(localFailure.uuid, { status: serverRecord.status });
+                    console.log(`[DEBUG-SYNC] Record UUID ${localFailure.uuid} status updated to: ${serverRecord.status}`);
                 }
             }
         }

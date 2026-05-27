@@ -42,9 +42,10 @@ const getStatusBadge = (status) => {
 
 // Create a real-time reactive database subscription using Dexie liveQuery
 const subscription = liveQuery(async () => {
-    const localFailures = await db.failures.reverse().toArray();
+    // Query local database sorted chronologically by creation timestamp
+    const localFailures = await db.failures.orderBy('created_at').reverse().toArray();
     
-    // Hydrate local records with core vehicle entities
+    // Hydrate local records with related vehicle entities
     return await Promise.all(localFailures.map(async (report) => {
         const vehicle = await db.vehicles.get(Number(report.vehicle_id) || report.vehicle_id);
         return {
@@ -58,7 +59,7 @@ const subscription = liveQuery(async () => {
         isLoading.value = false;
     },
     error: (err) => {
-        console.error('Dexie liveQuery subscription stream encountered an error:', err);
+        console.error('Dexie liveQuery error:', err);
         isLoading.value = false;
     }
 });
@@ -90,7 +91,7 @@ onUnmounted(() => {
         <div v-else class="space-y-4">
             <div 
                 v-for="report in reports" 
-                :key="report.id" 
+                :key="report.uuid" 
                 class="bg-white p-5 rounded-3xl shadow-sm border-b-4 border-slate-300 flex items-center space-x-4"
             >
                 <div class="w-24 h-24 bg-slate-100 rounded-2xl shrink-0 overflow-hidden border border-slate-200 flex items-center justify-center">
