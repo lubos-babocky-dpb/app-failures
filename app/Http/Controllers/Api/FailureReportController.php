@@ -15,18 +15,36 @@ class FailureReportController extends Controller
     /**
      * Endpoint for receiving offline reports submitted by drivers.
      */
-    public function store(Request $request): JsonResponse
-    {
-        // Validate incoming payload from the PWA application using strict column naming
+    public function store(
+        Request $request
+    ): JsonResponse {
+        // REMOVED: unique rule from uuid validation to support idempotent retries
         $validated = $request->validate([
-            'uuid' => 'required|uuid|unique:dpb_vehicle_failures,uuid',
+            'uuid' => 'required|uuid',
             'vehicle_id' => 'required|integer',
             'user_uuid' => 'required|uuid',
             'category_id' => 'required|string',
             'note' => 'nullable|string',
-            'photo_path' => 'nullable|string', // Adjusted matching your PWA sync payload layout
-            'client_created_at' => 'required|date' // Expecting specific offline timestamp key from PWA
+            'photo_path' => 'nullable|string',
+            'client_created_at' => 'required|date'
         ]);
+
+        // Check if this failure record was already saved during a previous network attempt
+        $existingFailure = VehicleFailure::query()
+            ->where(
+                column: 'uuid',
+                operator: '=',
+                value: $validated['uuid']
+            )
+            ->first();
+
+        if ($existingFailure) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Failure report already synchronized previously.',
+                'uuid' => $existingFailure->uuid
+            ], 200); // Return 200 OK instead of 422 validation failure
+        }
 
         $photoPath = null;
 
@@ -36,7 +54,6 @@ class FailureReportController extends Controller
                 $imageStream = explode(',', $validated['photo_path']);
                 $decodedImage = base64_decode($imageStream[1]);
                 
-                // Determine file extension
                 $extension = 'jpg';
                 if (Str::contains($imageStream[0], 'png')) {
                     $extension = 'png';
@@ -62,7 +79,6 @@ class FailureReportController extends Controller
             'status' => 'odoslané'
         ]);
 
-        // Return standard response with the synchronized tracking UUID
         return response()->json([
             'status' => 'success',
             'message' => 'Failure report synchronized and saved.',
@@ -73,13 +89,13 @@ class FailureReportController extends Controller
     /**
      * Get current statuses of all failures for a specific device.
      */
-    public function checkStatuses(Request $request): JsonResponse
-    {
+    public function checkStatuses(
+        Request $request
+    ): JsonResponse {
         $validated = $request->validate([
             'user_uuid' => 'required|uuid',
         ]);
 
-        // Select uuid instead of internal incremental id to support PWA sync logic
         $failures = VehicleFailure::query()
             ->where(column: 'user_uuid', operator: '=', value: $validated['user_uuid'], boolean: 'and')
             ->get(['uuid', 'status']);
