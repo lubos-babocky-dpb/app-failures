@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -28,5 +29,29 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Vzťah na uložené zariadenia zamestnanca.
+     */
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(UserPushSubscription::class); // Tvoj model pre tabuľku odberov
+    }
+
+    /**
+     * Laravel automaticky hľadá túto metódu pri smerovaní notifikácií.
+     */
+    public function routeNotificationForWebPush(): iterable
+    {
+        return $this->pushSubscriptions()->get();
+    }
+
+    /**
+     * Odstránenie neplatného zariadenia (napr. pri odinštalovaní PWA).
+     */
+    public function deletePushSubscription(string $endpoint): void
+    {
+        $this->pushSubscriptions()->where('endpoint', $endpoint)->delete();
     }
 }

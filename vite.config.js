@@ -17,8 +17,8 @@ export default defineConfig({
         VitePWA({
             strategies: 'generateSW',
             registerType: 'autoUpdate',
-            injectRegister: null, // Zmenené z 'script' (registráciu riešiš sám v app.js)
-            buildBase: '/build/', // Kľúčové pre Laravel, aby SW vedel kde hľadať skompilované súbory
+            injectRegister: null,
+            buildBase: '/build/',
             manifest: {
                 name: 'Dopravný podnik Bratislava - Poruchy',
                 short_name: 'DPB Poruchy',
@@ -38,6 +38,7 @@ export default defineConfig({
             },
             workbox: {
                 cleanupOutdatedCaches: true,
+                importScripts: ['/push-notification-listener.js'],
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
                 // Presmeruje offline požiadavky na Laravel index (zabezpečí beh Vue routeru offline)
                 navigateFallback: '/', 
