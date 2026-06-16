@@ -15,6 +15,12 @@ use Minishlink\WebPush\Subscription;
 // PRESNÁ ROUTA, KTORÚ VOLÁ TVOJ FRONTEND (Opravuje chybu 405 a obnovuje synchronizáciu)
 Route::post('/push-subscription', [PushSubscriptionController::class, 'store']);
 
+Route::get('/v1/vapid-key', function () {
+    return response()->json([
+        'publicKey' => config('services.webpush.public_key')
+    ]);
+});
+
 // BEZPEČNÝ TESTOVACÍ ENDPOINT PRE ODOSLANIE NOTIFIKÁCIE
 Route::get('/odpal-to-natvrdo', function () {
     // Vytiahne prvého usera, ktorý úspešne uložil odber do tabuľky user_push_subscriptions
@@ -41,11 +47,20 @@ Route::get('/odpal-to-natvrdo', function () {
     // Payload, ktorý zachytí a spracuje tvoj sw.js
     $payload = json_encode([
         'notification' => [
-            'title' => '⚠️ DISPEČING DPB',
-            'body'  => 'Ostrý test push notifikácie bez skurvených balíčkov.',
-            'icon'  => '/icon-512.png',
-            'data'  => [
-                'url' => '/'
+            'title' => '🚨 NOVÁ PORUCHA!',
+            'body'  => 'Na linke A nastal skrat. Okamžite prever situáciu.',
+            'icon'  => '/images/icon-192x192.png',
+            'badge' => '/images/badge-72x72.png',
+            
+            // --- TU DEFINUJEŠ SPRÁVANIE PRE TELEFÓN ---
+            'importance'         => 'high',        // Vysoká dôležitosť pre zobrazenie banneru
+            'priority'           => 2,             // Maximálna priorita pre staršie Androidy
+            'vibrate'            => [200, 100, 200], // Mobil MUSÍ zavibrovať/pípnuť, inak vyskakovacie okno nespustí
+            'requireInteraction' => true,          // Notifikácia nezmizne sama, kým ju nezmažeš
+            'tag'                => 'porucha-alarm', // Ak príde nová, prepíše starú a znova vyskočí
+            
+            'data' => [
+                'url' => '/poruchy/detail/123'    // URL, ktorú potom spracuje tvoj Service Worker pri kliknutí
             ]
         ]
     ]);
