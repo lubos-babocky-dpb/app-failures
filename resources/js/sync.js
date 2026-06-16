@@ -143,36 +143,54 @@ export const syncFailureStatuses = async () => {
         });
 
         if (response.ok) {
-            const serverFailures = await response.json(); // Expected payload structure: [{uuid: "...", status: "reported"}]
+            const serverFailures = await response.json(); // Payload: [{uuid: "...", status: "odoslané"}]
+            console.log('[DEBUG-SYNC] Received statuses from server:', serverFailures);
 
-            // If remote DB was cleared, wipe all local synced entries
+            // 1. Ak je DB na serveri prázdna, vymažeme z prehliadača lokálne synchronizované položky
             if (serverFailures.length === 0) {
                 await db.failures.where('status').equals('synced').delete();
                 console.log('[DEBUG-SYNC] Server DB is empty. Cleared all local "synced" records.');
                 return;
             }
 
+            // 2. Obojstranný Upsert: Stiahneme chýbajúce, alebo aktualizujeme zmenené stavy porúch
+            for (const serverFailure of serverFailures) {
+                const localRecord = await db.failures.get(serverFailure.uuid);
+
+                if (!localRecord) {
+                    // Ak záznam lokálne po premazaní chýba, stiahneme ho zo servera a zapíšeme do IndexedDB
+                    await db.failures.add({
+                        uuid: serverFailure.uuid,
+                        status: serverFailure.status,
+                        // Základné fallback hodnoty pre konzistenciu IndexedDB štruktúry
+                        vehicle_id: serverFailure.vehicle_id || null,
+                        category_id: serverFailure.category_id || null,
+                        note: serverFailure.note || '',
+                        photo_path: serverFailure.photo_path || null,
+                        created_at: serverFailure.client_created_at || new Date().toISOString()
+                    });
+                    console.log(`[DEBUG-SYNC] Downloaded and added missing record UUID: ${serverFailure.uuid}`);
+                } else if (localRecord.status !== serverFailure.status && localRecord.status !== 'pending_sync') {
+                    // Ak záznam existuje, ale zmenil sa životný cyklus na backend-e, aktualizujeme stav
+                    await db.failures.update(serverFailure.uuid, { status: serverFailure.status });
+                    console.log(`[DEBUG-SYNC] Record UUID ${serverFailure.uuid} status updated to: ${serverFailure.status}`);
+                }
+            }
+
+            // 3. Čistka osirelých dát: Odstránime z prehliadača tie poruchy, ktoré už na serveri reálne neexistujú
             const serverUuids = serverFailures.map(f => f.uuid);
             const localFailures = await db.failures.toArray();
 
             for (const localFailure of localFailures) {
-                // Keep local unsynced drafts untouched
-                if (localFailure.status === 'pending_sync') continue;
-
-                // Delete local record directly using uuid if it no longer exists on the server
-                if (!serverUuids.includes(localFailure.uuid)) {
+                if (localFailure.status !== 'pending_sync' && !serverUuids.includes(localFailure.uuid)) {
                     await db.failures.delete(localFailure.uuid); 
-                    console.log(`[DEBUG-SYNC] Deleted orphaned local record UUID: ${localFailure.uuid}`);
-                    continue;
-                }
-
-                // Update local life-cycle status using uuid match
-                const serverRecord = serverFailures.find(f => f.uuid === localFailure.uuid);
-                if (serverRecord && localFailure.status !== serverRecord.status) {
-                    await db.failures.update(localFailure.uuid, { status: serverRecord.status });
-                    console.log(`[DEBUG-SYNC] Record UUID ${localFailure.uuid} status updated to: ${serverRecord.status}`);
+                    console.log(`[DEBUG-SYNC] Cleared orphaned local record UUID: ${localFailure.uuid}`);
                 }
             }
+            console.log('[DEBUG-SYNC] Failure statuses sync process completed.');
+        } else {
+            const errorText = await response.text();
+            console.error(`[DEBUG-SYNC] Server responded with error status ${response.status}:`, errorText);
         }
     } catch (error) {
         console.error('[DEBUG-SYNC] Error during failure statuses sync:', error);
