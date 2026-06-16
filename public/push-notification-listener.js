@@ -15,16 +15,28 @@ self.addEventListener('push', function (event) {
 
 self.addEventListener('notificationclick', function (event) {
     event.notification.close();
-    const targetUrl = event.notification.data && event.notification.data.url ? event.notification.data.url : '/';
+    
+    // 1. Vytiahneme relatívnu URL, ktorú sme poslali z Laravel Observera (/history/detail/{uuid})
+    const relativeUrl = event.notification.data && event.notification.data.url 
+        ? event.notification.data.url 
+        : '/history';
+
+    // 2. Preklopíme ju na absolútnu URL vzhľadom k doméne (spraví to http://localhost/history/detail/...)
+    const targetUrl = new URL(relativeUrl, self.location.origin).href;
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
+            // 3. Skontrolujeme, či už používateľ nemá tvoju appku otvorenú
             for (const client of clientList) {
-                if (client.url.includes(targetUrl) && 'focus' in client) {
+                if (client.url === targetUrl && 'focus' in client) {
                     return client.focus();
                 }
             }
-            if (clients.openWindow) return clients.openWindow(targetUrl);
+            
+            // 4. Ak appka nebola otvorená vôbec, alebo bol na inej podstránke, otvoríme nové okno s detailom poruchy
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
         })
     );
 });

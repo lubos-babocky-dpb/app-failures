@@ -13,11 +13,19 @@ initUserIdentity().then(() => {
     });
 });
 
-// Automaticky požiada o povolenie pri prvom kliknutí používateľa kamkoľvek na stránku
+// Automaticky požiada o povolenie pri prvom kliknutí, ALE IBA AK EŠTE NOTIFIKÁCIE NIE SÚ POVOLENÉ
 window.addEventListener('click', function onceClick() {
+    // 1. KROK: Ak už notifikácie prehliadač povolil, potichu listener zrušíme a nič nespúšťame
+    if ('Notification' in window && Notification.permission === 'granted') {
+        window.removeEventListener('click', onceClick);
+        return;
+    }
+
+    // 2. KROK: Ak povolenie ešte udelené nie je, normálne to skúsime spustiť
     if (typeof window.subscribeUserToPush === 'function') {
         window.subscribeUserToPush();
     }
+    
     // Odstránime listener, aby to nevyskakovalo pri každom ďalšom kliknutí
     window.removeEventListener('click', onceClick);
 }, { once: true });

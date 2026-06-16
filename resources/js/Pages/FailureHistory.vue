@@ -3,10 +3,12 @@ import { ref, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { liveQuery } from 'dexie';
 import { db } from '../db';
+import { useRouter } from 'vue-router';
 
 const { t, locale } = useI18n();
 const reports = ref([]);
 const isLoading = ref(true);
+const router = useRouter();
 
 /**
  * Formats a standardized ISO date string into locale layout.
@@ -91,7 +93,8 @@ onUnmounted(() => {
         <div v-else class="space-y-4">
             <div 
                 v-for="report in reports" 
-                :key="report.uuid" 
+                :key="report.uuid"
+                @click="router.push('/history/detail/' + report.uuid)"
                 class="bg-white p-5 rounded-3xl shadow-sm border-b-4 border-slate-300 flex items-center space-x-4"
             >
                 <div class="w-24 h-24 bg-slate-100 rounded-2xl shrink-0 overflow-hidden border border-slate-200 flex items-center justify-center">

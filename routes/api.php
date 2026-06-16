@@ -5,12 +5,23 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
+use App\Http\Controllers\Api\FailureReportController;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| API Routes - V1 API pre poruchy
 |--------------------------------------------------------------------------
 */
+
+Route::prefix('v1')->group(function (): void {
+    
+    // 1. Endpoint pre ukladanie offline porúch od vodičov (POST)
+    Route::post('/failures/store', [FailureReportController::class, 'store']);
+    
+    // 2. Endpoint pre kontrolu aktuálnych statusov porúch pre zariadenie (POST)
+    Route::post('/failures/check-statuses', [FailureReportController::class, 'checkStatuses']);
+    
+});
 
 // PRESNÁ ROUTA, KTORÚ VOLÁ TVOJ FRONTEND (Opravuje chybu 405 a obnovuje synchronizáciu)
 Route::post('/push-subscription', [PushSubscriptionController::class, 'store']);
