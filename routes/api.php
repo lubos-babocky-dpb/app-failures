@@ -25,7 +25,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/failures/store', [FailureReportController::class, 'store']);
     
     // 3. OPRAVENÉ: Zmenené z GET /failures/statuses na POST /failures/check-statuses, aby to sedelo s IndexedDB sync
-    Route::post('/failures/statuses', [FailureReportController::class, 'checkStatuses']);
+    Route::get('/failures/statuses', [FailureReportController::class, 'checkStatuses']);
     
     Route::post('/user/handshake', UserHandshakeController::class);
 });
