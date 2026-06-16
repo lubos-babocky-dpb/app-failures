@@ -96,7 +96,7 @@ class FailureReportController extends Controller
         ]);
 
         $failures = VehicleFailure::query()
-            ->where(column: 'user_uuid', operator: '=', value: $validated['user_uuid'], boolean: 'and')
+            //->where(column: 'user_uuid', operator: '=', value: $validated['user_uuid'], boolean: 'and')
             ->get([
                 'uuid', 
                 'status', 
