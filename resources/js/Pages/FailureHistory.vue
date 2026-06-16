@@ -49,10 +49,14 @@ const subscription = liveQuery(async () => {
     
     // Hydrate local records with related vehicle entities
     return await Promise.all(localFailures.map(async (report) => {
-        const vehicle = await db.vehicles.get(Number(report.vehicle_id) || report.vehicle_id);
+        // DEFENSIVE CHECK: Prevent passing undefined/null/NaN into Table.get()
+        const vehicleId = report && report.vehicle_id ? (Number(report.vehicle_id) || report.vehicle_id) : null;
+        
+        const vehicle = vehicleId ? await db.vehicles.get(vehicleId) : null;
+        
         return {
             ...report,
-            vehicleCode: vehicle ? vehicle.code : report.vehicle_id
+            vehicleCode: vehicle ? vehicle.code : (report.vehicle_id || '---')
         };
     }));
 }).subscribe({
@@ -116,7 +120,7 @@ onUnmounted(() => {
                                 {{ report.vehicleCode }}
                             </span>
                             <span class="text-[#e30613] font-black text-base uppercase mt-1">
-                                {{ t('history.code_label') }}: {{ report.category_id }}
+                                {{ t('history.code_label') }}: {{ report.category_id || '---' }}
                             </span>
                         </div>
                         

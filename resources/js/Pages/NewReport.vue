@@ -181,7 +181,7 @@ const submitReport = async () => {
             vehicle_id: Number(vehicleId.value) || vehicleId.value,
             category_id: selectedFailure.value.code,
             note: note.value,
-            photo_path: photoPreview.value || null, // Renamed payload field to match photo_path column definition
+            photo: photoPreview.value || null,
             status: 'pending_sync',
             created_at: new Date().toISOString()
         });

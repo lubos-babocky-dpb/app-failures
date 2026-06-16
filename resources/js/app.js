@@ -13,28 +13,15 @@ initUserIdentity().then(() => {
     });
 });
 
-// Automaticky požiada o povolenie pri prvom kliknutí, ALE IBA AK EŠTE NOTIFIKÁCIE NIE SÚ POVOLENÉ
-window.addEventListener('click', function onceClick() {
-    // 1. KROK: Ak už notifikácie prehliadač povolil, potichu listener zrušíme a nič nespúšťame
-    if ('Notification' in window && Notification.permission === 'granted') {
-        window.removeEventListener('click', onceClick);
-        return;
-    }
-
-    // 2. KROK: Ak povolenie ešte udelené nie je, normálne to skúsime spustiť
-    if (typeof window.subscribeUserToPush === 'function') {
-        window.subscribeUserToPush();
-    }
-    
-    // Odstránime listener, aby to nevyskakovalo pri každom ďalšom kliknutí
-    window.removeEventListener('click', onceClick);
-}, { once: true });
-
-// Register global network status listeners to auto-trigger syncing when connectivity resumes
-window.addEventListener('online', () => {
-    console.log('Network connectivity restored. Triggering upload sync...');
-    syncPendingFailures();
-});
+// Kontrola a registrácia push tokenu hneď pri štarte aplikácie, bez čakania na klikanie
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(() => {
+        if (typeof window.subscribeUserToPush === 'function') {
+            // Spustí sa potichu na pozadí pri každom štarte/refreshi aplikácie
+            window.subscribeUserToPush();
+        }
+    });
+}
 
 const app = createApp(App);
 app.use(router);
@@ -58,16 +45,23 @@ function urlBase64ToUint8Array(base64String) {
 
 window.subscribeUserToPush = async function() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        alert('Tento prehliadač nepodporuje push notifikácie. Ak máte iPhone, musíte si aplikáciu najprv pridať na plochu cez Safari.');
         return;
     }
 
     try {
         const registration = await navigator.serviceWorker.ready;
         
+        // Zistíme stav povolenia PREDTÝM, než požiadame o nové (aby sme vedeli, či máme dať neskôr alert)
+        const existingPermission = Notification.permission;
+
+        // Ak už používateľ v minulosti notifikácie natvrdo zamietol, neotravujeme ho
+        if (existingPermission === 'denied') {
+            return;
+        }
+
+        // Vyžiadanie/overenie povolenia
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
-            alert('Na prijímanie dôležitých správ z dispečingu musíte povoliť notifikácie.');
             return;
         }
 
@@ -84,8 +78,6 @@ window.subscribeUserToPush = async function() {
         });
 
         const subJson = subscription.toJSON();
-
-        // Vytiahnutie správneho UUID zariadenia na základe kódu z userAuth.js
         const userUuid = localStorage.getItem('dpb_user_uuid'); 
 
         if (!userUuid) {
@@ -93,7 +85,7 @@ window.subscribeUserToPush = async function() {
             return;
         }
 
-        // POUŽIJEME ČISTÝ NATÍVNY FETCH BEZ AXIOSU
+        // POST dopyt prebehne zakaždým, čím zabezpečíme, že tabuľka v DB bude VŽDY plná a zosynchronizovaná
         const response = await fetch('/api/push-subscription', {
             method: 'POST',
             headers: {
@@ -114,10 +106,13 @@ window.subscribeUserToPush = async function() {
             throw new Error('Server odpovedal chybovým statusom: ' + response.status);
         }
 
-        alert('Notifikácie boli úspešne aktivované!');
+        // OPRAVA: Alert vyskočí IBA vtedy, ak sa stav zmenil z 'default' (prvé povolenie) na 'granted'
+        // Ak bol stav už predtým 'granted', kód zbehne úplne potichu na pozadí bez otravovania!
+        if (existingPermission === 'default') {
+            alert('Notifikácie boli úspešne aktivované!');
+        }
 
     } catch (error) {
         console.error('Chyba pri registrácii push odberu:', error);
-        alert('Nepodarilo sa aktivovať notifikácie. Skontrolujte pripojenie alebo SSL certifikát servera.');
     }
 };

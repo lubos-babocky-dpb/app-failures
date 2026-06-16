@@ -13,8 +13,10 @@ class VehicleFailureObserver
     /**
      * Spustí sa automaticky po úspešnom zápise do dpb_vehicle_failures.
      */
-    public function created(VehicleFailure $vehicleFailure): void
-    {
+    public function created(
+        VehicleFailure $vehicleFailure
+    ): void {
+        logger()->info(__METHOD__ . ' called');
         $auth = [
             'VAPID' => [
                 'subject'    => 'mailto:babocky@gmail.com',

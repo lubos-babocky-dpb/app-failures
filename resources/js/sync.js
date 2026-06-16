@@ -5,7 +5,6 @@ import { db } from './db';
  * This guarantees full offline accessibility for the PWA form.
  */
 export const syncStaticData = async () => {
-    // Check connectivity layout before executing fetch request streams
     if (!navigator.onLine) {
         console.log('Device is offline. Skipping static data synchronization.');
         return;
@@ -45,14 +44,12 @@ export const syncStaticData = async () => {
 export const syncPendingFailures = async () => {
     console.log('[DEBUG-SYNC] >>> syncPendingFailures() triggered');
     
-    // Check connectivity layout before parsing structural queues
     if (!navigator.onLine) {
         console.log('[DEBUG-SYNC] Device is offline. Postponing report upload.');
         console.log('[DEBUG-SYNC] <<< syncPendingFailures() finished');
         return;
     }
 
-    // Add a slight delay to ensure Dexie internal write transactions are fully closed
     await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
@@ -70,13 +67,11 @@ export const syncPendingFailures = async () => {
             return;
         }
 
-        // Pull the immutable device UUID from localStorage to append identity to the requests
         const deviceUuid = localStorage.getItem('dpb_user_uuid');
 
         for (const failure of pendingFailures) {
             console.log(`[DEBUG-SYNC] Attempting to POST record UUID: ${failure.uuid} to server...`);
             
-            // Re-verify connection layout mid-loop execution parameters
             if (!navigator.onLine) {
                 console.warn('[DEBUG-SYNC] Network lost during synchronization loop. Aborting remainder.');
                 break;
@@ -95,7 +90,7 @@ export const syncPendingFailures = async () => {
                     user_uuid: deviceUuid,
                     category_id: failure.category_id,
                     note: failure.note,
-                    photo_path: failure.photo_path,
+                    photo: failure.photo,
                     client_created_at: failure.created_at
                 })
             });
@@ -112,7 +107,6 @@ export const syncPendingFailures = async () => {
             }
         }
     } catch (error) {
-        // Demote execution thread errors to warning logging upon basic fetch layer faults
         if (error.name === 'TypeError' || error.message.includes('fetch')) {
             console.warn('[DEBUG-SYNC] Network connectivity issues during sync loop:', error.message);
         } else {
@@ -143,48 +137,71 @@ export const syncFailureStatuses = async () => {
         });
 
         if (response.ok) {
-            const serverFailures = await response.json(); // Payload: [{uuid: "...", status: "odoslané"}]
-            console.log('[DEBUG-SYNC] Received statuses from server:', serverFailures);
+            const rawServerFailures = await response.json();
+            console.log('[DEBUG-SYNC] Raw payload from server:', rawServerFailures);
 
-            // 1. Ak je DB na serveri prázdna, vymažeme z prehliadača lokálne synchronizované položky
+            // DEFENZÍVNY FILTER: Pustíme ďalej len tie objekty, ktoré majú aspoň nejaký identifikátor
+            const serverFailures = Array.isArray(rawServerFailures) 
+                ? rawServerFailures.filter(f => f && (f.uuid || f.id)) 
+                : [];
+
+            // 1. Ak server vrátil prázdne pole, premažeme lokálne synchronizované záznamy
             if (serverFailures.length === 0) {
                 await db.failures.where('status').equals('synced').delete();
                 console.log('[DEBUG-SYNC] Server DB is empty. Cleared all local "synced" records.');
                 return;
             }
 
-            // 2. Obojstranný Upsert: Stiahneme chýbajúce, alebo aktualizujeme zmenené stavy porúch
+            // 2. Cyklus pre bezpečné ukladanie a aktualizáciu statusov
             for (const serverFailure of serverFailures) {
-                const localRecord = await db.failures.get(serverFailure.uuid);
+                // Striktne vytiahneme string kľúč, s ktorým Dexie dokáže pracovať
+                const targetUuid = serverFailure.uuid || serverFailure.id;
+                
+                // Absolútna poistka proti Invalid argument to Table.get()
+                if (!targetUuid || typeof targetUuid !== 'string') {
+                    console.warn('[DEBUG-SYNC] Preskakujem nevalidný záznam zo servera kvôli chýbajúcemu UUID identifikátoru:', serverFailure);
+                    continue;
+                }
+
+                const localRecord = await db.failures.get(targetUuid);
 
                 if (!localRecord) {
-                    // Ak záznam lokálne po premazaní chýba, stiahneme ho zo servera a zapíšeme do IndexedDB
-                    await db.failures.add({
-                        uuid: serverFailure.uuid,
-                        status: serverFailure.status,
-                        // Základné fallback hodnoty pre konzistenciu IndexedDB štruktúry
-                        vehicle_id: serverFailure.vehicle_id || null,
-                        category_id: serverFailure.category_id || null,
+                    // Inicializujeme objekt bez akýchkoľvek NULL hodnôt pre reaktívne Vue šablóny
+                    const recordToAdd = {
+                        uuid: targetUuid,
+                        status: serverFailure.status || 'odoslané',
                         note: serverFailure.note || '',
-                        photo_path: serverFailure.photo_path || null,
-                        created_at: serverFailure.client_created_at || new Date().toISOString()
-                    });
-                    console.log(`[DEBUG-SYNC] Downloaded and added missing record UUID: ${serverFailure.uuid}`);
+                        created_at: serverFailure.client_created_at || serverFailure.created_at || new Date().toISOString()
+                    };
+
+                    // Cudzie kľúče pripájame explicitne iba ak reálne existujú, žiadne null/undefined fallbacky
+                    if (serverFailure.vehicle_id) {
+                        recordToAdd.vehicle_id = serverFailure.vehicle_id;
+                    }
+                    if (serverFailure.category_id) {
+                        recordToAdd.category_id = serverFailure.category_id;
+                    }
+                    if (serverFailure.photo) {
+                        recordToAdd.photo = serverFailure.photo;
+                    }
+
+                    await db.failures.add(recordToAdd);
+                    console.log(`[DEBUG-SYNC] Bezpečne pridaná chýbajúca porucha zo servera: ${targetUuid}`);
                 } else if (localRecord.status !== serverFailure.status && localRecord.status !== 'pending_sync') {
-                    // Ak záznam existuje, ale zmenil sa životný cyklus na backend-e, aktualizujeme stav
-                    await db.failures.update(serverFailure.uuid, { status: serverFailure.status });
-                    console.log(`[DEBUG-SYNC] Record UUID ${serverFailure.uuid} status updated to: ${serverFailure.status}`);
+                    // Ak záznam existuje, iba zaktualizujeme stav z backendu
+                    await db.failures.update(targetUuid, { status: serverFailure.status });
+                    console.log(`[DEBUG-SYNC] Stav poruchy ${targetUuid} zmenený na: ${serverFailure.status}`);
                 }
             }
 
-            // 3. Čistka osirelých dát: Odstránime z prehliadača tie poruchy, ktoré už na serveri reálne neexistujú
-            const serverUuids = serverFailures.map(f => f.uuid);
+            // 3. Vyčistenie lokálnych záznamov, ktoré už na serveri reálne neexistujú
+            const serverUuids = serverFailures.map(f => f.uuid || f.id).filter(id => id && typeof id === 'string');
             const localFailures = await db.failures.toArray();
 
             for (const localFailure of localFailures) {
                 if (localFailure.status !== 'pending_sync' && !serverUuids.includes(localFailure.uuid)) {
                     await db.failures.delete(localFailure.uuid); 
-                    console.log(`[DEBUG-SYNC] Cleared orphaned local record UUID: ${localFailure.uuid}`);
+                    console.log(`[DEBUG-SYNC] Vymazaná osirelá lokálna porucha: ${localFailure.uuid}`);
                 }
             }
             console.log('[DEBUG-SYNC] Failure statuses sync process completed.');
@@ -193,6 +210,6 @@ export const syncFailureStatuses = async () => {
             console.error(`[DEBUG-SYNC] Server responded with error status ${response.status}:`, errorText);
         }
     } catch (error) {
-        console.error('[DEBUG-SYNC] Error during failure statuses sync:', error);
+        console.error('[DEBUG-SYNC] Fatálna chyba počas behu syncFailureStatuses:', error);
     }
 };
