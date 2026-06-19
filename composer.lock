@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d0d4810d3d9fe22b49ebda3e0b89f0b8",
+    "content-hash": "3f6a1eceaee1941fe0757f580c8626ef",
     "packages": [
         {
             "name": "brick/math",
@@ -376,6 +376,37 @@
                 }
             ],
             "time": "2024-02-05T11:56:58+00:00"
+        },
+        {
+            "name": "dpb/failures",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "./packages/dpb/failures",
+                "reference": "12e9dd582725d333d7fe4e0bec1c325150e6f30e"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Dpb\\Failures\\Providers\\FailuresServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Dpb\\Failures\\": "src/",
+                    "Dpb\\Failures\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Module for managing and reporting vehicle technical failures for DPB",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "dragonmantank/cron-expression",
@@ -8927,12 +8958,14 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "dpb/failures": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.3"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

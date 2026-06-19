@@ -40,9 +40,7 @@ export default defineConfig({
                 cleanupOutdatedCaches: true,
                 importScripts: ['/push-notification-listener.js'],
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-                // Presmeruje offline požiadavky na Laravel index (zabezpečí beh Vue routeru offline)
                 navigateFallback: '/', 
-                // Ignoruj API požiadavky, tie nechceme vracať ako fallback HTML
                 navigateFallbackDenylist: [/^\/api/] 
             }
         })
