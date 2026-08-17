@@ -6,15 +6,20 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "repositories": [
-        {"type": "path", "url": "./packages/dpb/*", "options": {"symlink": true}}
+        {"type": "path", "url": "./packages/dpb/*", "options": {"symlink": true}},
+        {"type": "path", "url": "./app-modules/*", "options": {"symlink": true}}
     ],
     "require": {
         "php": "^8.3",
+        "dpb/admin-ui-vue": "@dev",
         "dpb/failures": "@dev",
+        "dpb/failures-ui-vue": "@dev",
+        "dpb/sanctuary": "@dev",
         "laravel/framework": "^13.8",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
-        "minishlink/web-push": "^10.1"
+        "minishlink/web-push": "^10.1",
+        "spatie/laravel-permission": "^8.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

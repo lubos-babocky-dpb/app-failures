@@ -6,11 +6,9 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | 1. VŠETKY API ROUTY (Dáta pre PWA)
 |--------------------------------------------------------------------------
-| Tieto URL komunikujú cez JSON. Sem neskôr dopíšeš svoje Controllery.
 */
 Route::prefix('api')->group(function () {
     Route::get('/vehicles', function () {
-        // Ukážka: vráti zoznam vozidiel z DB pre formulár vo Vue
         return response()->json([
             ['id' => 1, 'name' => 'Električka Škoda 30T'],
             ['id' => 2, 'name' => 'Autobus SOR NS 12'],
@@ -18,18 +16,27 @@ Route::prefix('api')->group(function () {
     });
 
     Route::post('/failures', function () {
-        // Sem bude Dexie z mobilu strieľať offline nahlásené poruchy
         return response()->json(['success' => true]);
     });
 });
 
 /*
 |--------------------------------------------------------------------------
-| 2. SPA FALLBACK ROUTE (Štartovací bod pre Vue)
+| 2. DOČASNÁ ROUTA PRE NOVÝ SVET (Modulárny Monolit)
 |--------------------------------------------------------------------------
-| Akákoľvek webová URL príde (či už domovská /, alebo /historia pri F5),
-| Laravel ju nezlyhá na 404-ke, ale vráti túto jednu Blade šablónu.
-| Vue Router si už potom URL v prehliadači rozparsuje offline sám.
+| Ak URL začína na /pwa-new, vždy vrátime nový template. Vue Router vnútri 
+| modular-app.js si už tú zvyšnú časť (napr. /history) spracuje sám.
+*/
+Route::get('/pwa-new/{any?}', function () {
+    return view('modular-monolith-pwa');
+})->where('any', '.*');
+
+/*
+|--------------------------------------------------------------------------
+| 3. STARÝ SPA FALLBACK ROUTE (Pôvodná aplikácia)
+|--------------------------------------------------------------------------
+| Všetko ostatné, čo nie je API a nezačína na /pwa-new, spadne sem 
+| a načíta starú aplikáciu. Vďaka tomu ti produkcia stále beží.
 */
 Route::fallback(function () {
     return view('pwa');

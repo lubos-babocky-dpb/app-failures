@@ -1,0 +1,18 @@
+{
+    "name": "dpb/failures-ui-vue",
+    "description": "VUE UI module for failures",
+    "type": "library",
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "Dpb\\FailuresUiVue\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Dpb\\FailuresUiVue\\Providers\\FailuresUiVueServiceProvider"
+            ]
+        }
+    }
+}

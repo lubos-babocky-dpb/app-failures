@@ -7,10 +7,8 @@
     const { t, locale } = useI18n();
     const router = useRouter();
     const route = useRoute();
-
     const isMenuOpen = ref(false);
 
-    // Sledovanie zmeny jazyka a ukladanie do localStorage
     watch(locale, (newLocale) => {
         localStorage.setItem('dpb_locale', newLocale);
     });

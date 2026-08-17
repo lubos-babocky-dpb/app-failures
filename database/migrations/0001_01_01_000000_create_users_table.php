@@ -1,26 +1,21 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->unique();
             $table->string('name');
-            $table->string('personal_number')->nullable();
-            $table->string('department_code')->nullable();
-            $table->string('department_name')->nullable();
-            $table->string('email')->nullable()->unique();
+            $table->string('email')->unique();
+            $table->integer('personal_id')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password')->nullable();
+            $table->string('password');
             $table->rememberToken();
             $table->timestamps();
         });
@@ -39,11 +34,15 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
+    
+        User::create([
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
+            'personal_id' => 17945,
+            'password' => bcrypt('Test123!'),
+        ]);
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');
