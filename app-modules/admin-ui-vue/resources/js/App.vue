@@ -62,7 +62,7 @@
             </div>
         </header>
 
-        <main class="max-w-xl mx-auto p-6">
+        <main class="max-w-7xl mx-auto p-6">
             <RouterView />
         </main>
     </div>
