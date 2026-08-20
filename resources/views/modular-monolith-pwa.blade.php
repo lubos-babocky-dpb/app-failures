@@ -17,7 +17,7 @@
             if ('serviceWorker' in navigator) {
                 // Použijeme sw-modular.js, ktorý vygeneruje Vite cez injectManifest
                 navigator.serviceWorker.register('/modular-sw.js')
-                    .then(reg => console.log('Modulárny SW hotovo, beží.'))
+                    //.then(reg => console.log('Modulárny SW hotovo, beží.'))
                     .catch(err => console.error('Modulárny SW zlyhal:', err));
             }
         </script>

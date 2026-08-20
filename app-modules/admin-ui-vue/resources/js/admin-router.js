@@ -1,13 +1,9 @@
+import { Gatekeeper } from '@dpb/gatekeeper';
 import { createRouter, createWebHistory } from 'vue-router';
-
 import LoginPage from './pages/LoginPage.vue';
 import DashboardPage from './pages/DashboardPage.vue';
-
 import './services/admin-modules.js';
-
 import admin from './services/admin-registry.js';
-import { isAuthenticated } from './services/auth.js';
-
 
 const router = createRouter({
     history: createWebHistory('/admin/'),
@@ -28,13 +24,14 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
-    if (to.name !== 'admin.login' && !isAuthenticated()) {
+
+    if (to.name !== 'admin.login' && !Gatekeeper.hasAdminPrivileges) {
         return {
             name: 'admin.login',
         };
     }
 
-    if (to.name === 'admin.login' && isAuthenticated()) {
+    if (to.name === 'admin.login' && Gatekeeper.hasAdminPrivileges) {
         return {
             name: 'admin.dashboard',
         };

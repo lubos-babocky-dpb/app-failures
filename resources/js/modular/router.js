@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
+import UserInfoPage from "./Pages/UserInfoPage.vue";
 
 const router = createRouter({
-    history: createWebHistory('/pwa-new/'),
+    history: createWebHistory('/'),
     routes: [
         {
             path: '/',
@@ -28,6 +29,15 @@ const router = createRouter({
                 labelKey: 'nav.failure_detail',
                 icon: null,
                 isMenuItem: false
+            },
+        },
+        {
+            path: '/user-info',
+            component: UserInfoPage,
+            meta: {
+                labelKey: 'nav.user_info',
+                icon: null,
+                isMenuItem: true
             },
         },
     ],

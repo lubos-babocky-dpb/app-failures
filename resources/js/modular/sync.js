@@ -11,7 +11,7 @@ export const syncStaticData = async () => {
     }
 
     try {
-        console.log('Starting data synchronization...');
+        //console.log('Starting data synchronization...');
 
         // 1. Synchronize Vehicles Registry
         const vehicleResponse = await fetch('/api/v1/sync/vehicles');
@@ -20,7 +20,7 @@ export const syncStaticData = async () => {
         
         await db.vehicles.clear();
         await db.vehicles.bulkAdd(vehicles);
-        console.log('Vehicles synchronized successfully.');
+        //console.log('Vehicles synchronized successfully.');
 
         // 2. Synchronize Failure Categories Tree
         const categoryResponse = await fetch('/api/v1/sync/categories');
@@ -29,9 +29,9 @@ export const syncStaticData = async () => {
 
         await db.failure_categories.clear();
         await db.failure_categories.bulkAdd(categories);
-        console.log('Failure categories synchronized successfully.');
+        //console.log('Failure categories synchronized successfully.');
 
-        console.log('All dynamic registries are now fully cached offline.');
+        //console.log('All dynamic registries are now fully cached offline.');
     } catch (error) {
         console.error('Data synchronization failed:', error);
     }
@@ -42,7 +42,7 @@ export const syncStaticData = async () => {
  * Updates the local record status upon successful server acknowledgment.
  */
 export const syncPendingFailures = async () => {
-    console.log('[DEBUG-SYNC] >>> syncPendingFailures() triggered');
+    //console.log('[DEBUG-SYNC] >>> syncPendingFailures() triggered');
     
     if (!navigator.onLine) {
         console.log('[DEBUG-SYNC] Device is offline. Postponing report upload.');
@@ -53,17 +53,17 @@ export const syncPendingFailures = async () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
-        console.log('[DEBUG-SYNC] Querying IndexedDB for "pending_sync" records...');
+        //console.log('[DEBUG-SYNC] Querying IndexedDB for "pending_sync" records...');
         
         const pendingFailures = await db.failures
             .where('status')
             .equals('pending_sync')
             .toArray();
 
-        console.log(`[DEBUG-SYNC] Found records in DB:`, pendingFailures);
+        //console.log(`[DEBUG-SYNC] Found records in DB:`, pendingFailures);
 
         if (pendingFailures.length === 0) {
-            console.log('[DEBUG-SYNC] No pending reports to sync. Exiting.');
+            //console.log('[DEBUG-SYNC] No pending reports to sync. Exiting.');
             return;
         }
 
@@ -114,7 +114,7 @@ export const syncPendingFailures = async () => {
         }
     }
     
-    console.log('[DEBUG-SYNC] <<< syncPendingFailures() finished');
+    //console.log('[DEBUG-SYNC] <<< syncPendingFailures() finished');
 };
 
 /**

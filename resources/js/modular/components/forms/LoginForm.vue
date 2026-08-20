@@ -1,9 +1,6 @@
 <script setup>
-import { Gatekeeper } from '@dpb/gatekeeper';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
+import { Gatekeeper } from '@dpb/gatekeeper';
 
 const personalId = ref('');
 const password = ref('');
@@ -14,22 +11,8 @@ const error = ref('');
 async function submit() {
     error.value = '';
     loading.value = true;
-
-    try {
-        await Gatekeeper.loginWithCredentials(
-            String(personalId.value),
-            String(password.value)
-        );
-
-        await router.replace({
-            name: 'admin.dashboard',
-        });
-    } catch (exception) {
-        console.error(exception);
-        error.value = 'Nesprávne prihlasovacie údaje.';
-    } finally {
-        loading.value = false;
-    }
+    await Gatekeeper.loginWithCredentials(personalId.value, password.value);
+    loading.value = false;
 }
 </script>
 

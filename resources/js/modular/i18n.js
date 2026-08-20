@@ -5,7 +5,8 @@ const messages = {
         nav: {
             new_report: 'Nové hlásenie',
             history: 'História',
-            failure_detail: 'Detail poruhy'
+            failure_detail: 'Detail poruhy',
+            user_info: 'Profil'
         },
         report: {
             title: 'Nahlásiť novú poruchu',

@@ -5,7 +5,7 @@
     import { db } from '../db';
     import { LocalizedDateFormatter } from '../formatters/localized-date-formatter'
     import { FailureStatusResolver } from '../resolvers/failure-status-resolver';
-import { failureRepository } from '../repositories/failure-repository';
+    import { failureRepository } from '../repositories/failure-repository';
 
     const { t, locale } = useI18n();
     const router = useRouter();

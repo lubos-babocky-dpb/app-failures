@@ -1,18 +1,30 @@
 <script setup>
-    import { computed } from 'vue';
-
+    import { computed, onMounted, onUnmounted, ref } from 'vue';
     import router from './admin-router.js';
     import admin from './services/admin-registry.js';
-    import { getUser, logout } from './services/auth.js';
+    import { Gatekeeper, IdentityUpdatedEvent } from '@dpb/gatekeeper';
 
     const menuItems = admin.getMenuItems();
 
-    const currentUser = computed(() => getUser());
+    const currentUser = ref(Gatekeeper.identity?.user ?? null);
+
+    function handleIdentityUpdated() {
+        currentUser.value = Gatekeeper.identity?.user ?? null;
+    }
+
+    onMounted(() => {
+        Gatekeeper.addEventListener(IdentityUpdatedEvent.TYPE, handleIdentityUpdated);
+    })
+
+    onUnmounted(() => {
+        Gatekeeper.removeEventListener(IdentityUpdatedEvent.TYPE, handleIdentityUpdated);
+    });
 
     async function handleLogout() {
-        await logout();
 
-        await router.push({
+        await Gatekeeper.logout();
+
+        await router.replace({
             name: 'admin.login',
         });
     }

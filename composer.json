@@ -13,7 +13,6 @@
         "php": "^8.3",
         "dpb/admin-ui-vue": "@dev",
         "dpb/failures": "@dev",
-        "dpb/failures-ui-vue": "@dev",
         "dpb/sanctuary": "@dev",
         "laravel/framework": "^13.8",
         "laravel/sanctum": "^4.0",

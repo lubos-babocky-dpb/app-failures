@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "461f033b7024f7968ee44d74073276b3",
+    "content-hash": "a5dbf2631ec81bad56036e01aa56b5b9",
     "packages": [
         {
             "name": "brick/math",
@@ -409,11 +409,11 @@
         },
         {
             "name": "dpb/failures",
-            "version": "dev-main",
+            "version": "dev-feature/modular-monolith-pwa",
             "dist": {
                 "type": "path",
                 "url": "./app-modules/failures",
-                "reference": "2aab007bbc3cc27ca1021259c2fd39647a3403fa"
+                "reference": "0006854a23e61e17ada2ce0bc2c9348e22391a4a"
             },
             "type": "library",
             "extra": {
@@ -438,42 +438,12 @@
             }
         },
         {
-            "name": "dpb/failures-ui-vue",
-            "version": "dev-feature/modular-monolith-pwa",
-            "dist": {
-                "type": "path",
-                "url": "./app-modules/failures-vui",
-                "reference": "9fa778686c94408523e9b4a652c392c549d6c561"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Dpb\\FailuresUiVue\\Providers\\FailuresUiVueServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Dpb\\FailuresUiVue\\": "src/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "description": "VUE UI module for failures",
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
             "name": "dpb/sanctuary",
             "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "./packages/dpb/sanctuary",
-                "reference": "a44d758496a8e9cdffeeb867f285c9d2e46e4a1a"
+                "reference": "44fdd46eadea443464c2994869d11cf4d33d8987"
             },
             "type": "library",
             "extra": {
@@ -9199,7 +9169,6 @@
     "stability-flags": {
         "dpb/admin-ui-vue": 20,
         "dpb/failures": 20,
-        "dpb/failures-ui-vue": 20,
         "dpb/sanctuary": 20
     },
     "prefer-stable": true,

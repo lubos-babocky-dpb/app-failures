@@ -1,9 +1,9 @@
 import { createApp } from 'vue';
 import App from './App.vue';
-import router from './router';
-import { i18n } from './i18n';
-import { initUserIdentity } from './userAuth';
-import { syncStaticData, syncPendingFailures } from './sync';
+import router from './router.js';
+import { i18n } from './i18n.js';
+import { initUserIdentity } from './zzz_userAuth.js';
+import { syncStaticData, syncPendingFailures } from './sync.js';
 
 // Run initial synchronization routines on application bootstrap
 initUserIdentity().then(() => {

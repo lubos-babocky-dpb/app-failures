@@ -39,11 +39,7 @@
 </style>
 
 <template>
-  <div>
-    <span>{{ personalAccessToken }}</span>
-  </div>
-
-  <div class="min-h-screen bg-slate-100 text-slate-900 antialiased font-[sans-serif]">
+  <div class="h-dvh flex flex-col bg-slate-100 text-slate-900 antialiased font-[sans-serif]">
     <header class="bg-[#e30613] text-white shadow-lg sticky top-0 z-50">
         <div class="px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
@@ -60,8 +56,11 @@
             </div>
         </div>
     </header>
-    <main class="max-w-xl mx-auto p-6">
+
+    <main class="flex-1 min-h-0 max-w-xl w-full mx-auto p-6 flex flex-col">
+      <div class="flex-1 min-h-0">
         <router-view></router-view>
+      </div>
     </main>
   </div>
 </template>
