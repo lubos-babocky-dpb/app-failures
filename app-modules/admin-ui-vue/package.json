@@ -9,6 +9,7 @@
     "peerDependencies": {
         "vue": "^3.5.34",
         "vue-router": "^5.0.7",
-        "@dpb/gatekeeper": "workspace:*"
+        "@dpb/gatekeeper": "workspace:*",
+        "@pdb/page-router-vue": "workspace:*"
     }
 }

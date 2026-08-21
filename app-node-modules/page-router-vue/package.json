@@ -1,8 +1,11 @@
 {
-    "name": "@dpb/failures-ui-vue",
+    "name": "@dpb/page-router-vue",
     "version": "1.0.0",
     "private": true,
     "type": "module",
+    "exports": {
+        ".": "./src/index.js"
+    },
     "peerDependencies": {
         "vue": "^3.5.34",
         "vue-router": "^5.0.7"

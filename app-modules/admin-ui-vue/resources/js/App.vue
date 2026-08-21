@@ -1,10 +1,10 @@
 <script setup>
     import { computed, onMounted, onUnmounted, ref } from 'vue';
-    import router from './admin-router.js';
-    import admin from './services/admin-registry.js';
+    import { PageRouter } from '@dpb/page-router-vue';
     import { Gatekeeper, IdentityUpdatedEvent } from '@dpb/gatekeeper';
+    import LogoutButton from './components/actions/LogoutButton.vue';
 
-    const menuItems = admin.getMenuItems();
+    const menuItems = PageRouter.menuItems;
 
     const currentUser = ref(Gatekeeper.identity?.user ?? null);
 
@@ -12,22 +12,8 @@
         currentUser.value = Gatekeeper.identity?.user ?? null;
     }
 
-    onMounted(() => {
-        Gatekeeper.addEventListener(IdentityUpdatedEvent.TYPE, handleIdentityUpdated);
-    })
-
-    onUnmounted(() => {
-        Gatekeeper.removeEventListener(IdentityUpdatedEvent.TYPE, handleIdentityUpdated);
-    });
-
-    async function handleLogout() {
-
-        await Gatekeeper.logout();
-
-        await router.replace({
-            name: 'admin.login',
-        });
-    }
+    onMounted(() => Gatekeeper.addEventListener(IdentityUpdatedEvent.TYPE, handleIdentityUpdated));
+    onUnmounted(() => Gatekeeper.removeEventListener(IdentityUpdatedEvent.TYPE, handleIdentityUpdated));
 </script>
 
 <template>
@@ -62,15 +48,7 @@
                         {{ item.label }}
                     </RouterLink>
                 </nav>
-                <button
-                    v-if="currentUser"
-                    type="button"
-                    class="text-sm font-medium text-white/90 transition hover:text-white"
-                    @click="handleLogout"
-                >
-                    Odhlásiť
-                </button>
-
+                <LogoutButton v-if="currentUser" />
             </div>
         </header>
 

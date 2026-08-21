@@ -1,9 +1,9 @@
 <script setup>
 import { Gatekeeper } from '@dpb/gatekeeper';
+import { PageRouter } from '@dpb/page-router-vue';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import DashboardPage from '../../pages/DashboardPage.vue';
 
-const router = useRouter();
 
 const personalId = ref('');
 const password = ref('');
@@ -21,9 +21,13 @@ async function submit() {
             String(password.value)
         );
 
-        await router.replace({
-            name: 'admin.dashboard',
-        });
+        if(!Gatekeeper.hasAdminPrivileges) {
+            error.value = 'Nemáte oprávnenie na tieto stránky';
+            return;
+        }
+
+        await PageRouter.redirect(DashboardPage);
+
     } catch (exception) {
         console.error(exception);
         error.value = 'Nesprávne prihlasovacie údaje.';
