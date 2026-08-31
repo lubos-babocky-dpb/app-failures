@@ -19,7 +19,7 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, HasRoles;
 
-    protected string $guard_name = 'api';
+    protected string $guard_name = 'sanctuary_api';
 
     /**
      * Get the attributes that should be cast.

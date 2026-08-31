@@ -10,7 +10,7 @@ class PageRouter {
 
     constructor() {
         const modules = import.meta.glob(
-            '/app-node-modules/*/resources/js/routes.js',
+            '/app-node-modules/*/src/routes.js',
             {eager: true}
         );
 
@@ -55,7 +55,7 @@ class PageRouter {
         return this.registerPage({
             component: component,
             route: route ?? { path: '/' },
-            menu: menu,
+            menu: menu ?? {},
             guard: guard
         });
     }
@@ -108,17 +108,23 @@ class PageRouter {
     }
 
     #isAllowed(guardConfig) {
-        if (!guardConfig) {
+        if (!guardConfig || guardConfig.isPublic) {
             return true;
         }
 
-        if (!guardConfig.allowedRoles) {
-            return true;
-        }
-
-        return guardConfig.allowedRoles.some(
+        if(guardConfig.allowedRoles && guardConfig.allowedRoles.some(
             role => this.#identity.hasRole(role)
-        );
+        )) {
+            return true;
+        }
+
+        if(guardConfig.requiredAnyPermission && guardConfig.requiredAnyPermission.some(
+            permission => this.#identity.hasPermission(permission)
+        )) {
+            return true;
+        }
+
+        return false;
     }
 
     #registerGuards() {

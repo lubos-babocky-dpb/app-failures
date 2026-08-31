@@ -5,21 +5,12 @@ import vue from '@vitejs/plugin-vue';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-    build: {
-        rollupOptions: {
-            input: {
-                app: 'resources/js/modular-app.js',
-                sw: 'resources/js/modular-sw.js' // Vite teraz vie, že tento súbor má spracovať
-            }
-        }
-    },
     plugins: [
         laravel({
             input: [
                 'resources/css/app.css', 
-                'resources/js/app.js',                          // Starý vstupný bod (pre istotu ponechaný)
-                'resources/js/modular-app.js',                  // NOVÝ vstupný bod pre našu čistú architektúru
-                'app-modules/admin-ui-vue/resources/js/app.js'  // admin login
+                'resources/js/modular-app.js',
+                'app-modules/admin-ui-vue/resources/js/app.js'
             ],
             refresh: true,
             fonts: false,
@@ -33,6 +24,10 @@ export default defineConfig({
             outDir: 'public',
             injectRegister: null,
             registerType: 'autoUpdate',
+            devOptions: {
+                enabled: true,
+                type: 'module'
+            },
             workbox: {},
             navigateFallback: '/pwa-new',
             navigateFallbackDenylist: [/^\/api/],

@@ -2,8 +2,8 @@
 import { ref, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Html5Qrcode } from 'html5-qrcode';
-import { db } from '../db';
 import { syncPendingFailures } from '../sync';
+import { failuresUiVue } from '@dpb/failures-ui-vue';
 
 const { t } = useI18n();
 
@@ -86,22 +86,31 @@ const stopQrScanner = async () => {
 
 const handleVehicleSelection = async (scannedId) => {
     const idToFind = Number(scannedId) || scannedId;
-    
-    vehicleId.value = idToFind;
     vehicleData.value = { loading: true };
     categoryError.value = '';
 
-    if (errorTimeout) clearTimeout(errorTimeout);
-
-    const vehicle = await db.vehicles.get(idToFind);
-
-    if (vehicle) {
-        vehicleId.value = vehicle.id; 
-        vehicleData.value = vehicle;
-    } else {
-        vehicleData.value = { error: true, code: scannedId };
-        selectedFailure.value = null;
+    if (errorTimeout) {
+        clearTimeout(errorTimeout);
     }
+
+    const reportable = await failuresUiVue
+        .reportableAssetsRepository
+        .get(idToFind);
+
+    if (reportable) {
+        vehicleId.value = reportable.id;
+        vehicleData.value = reportable;
+
+        return;
+    }
+
+    vehicleId.value = '';
+    vehicleData.value = {
+        error: true,
+        code: idToFind
+    };
+
+    selectedFailure.value = null;
 };
 
 const openCategoryPicker = async () => {
@@ -115,14 +124,14 @@ const openCategoryPicker = async () => {
 
     try {
         // Fetch all failure categories directly from local IndexedDB storage
-        const allCategories = await db.failure_categories.toArray();
+        const allCategories = await failuresUiVue.failureCategoriesRepository.all();
 
         // Map internal descriptive types to short identifiers used in the business logic
         const typeMap = { 'Autobus': 'A', 'Električka': 'E', 'Trolejbus': 'T' };
         const vehicleType = typeMap[vehicleData.value.type.name] || 'A';
 
         // Filter the category tree on the client side based on the active vehicle's type
-        categoriesList.value = allCategories.filter(c => c.vehicleTypes.includes(vehicleType));
+        categoriesList.value = allCategories;
         
         // Reset modal navigation back to the root level view
         currentSubcategories.value = [];

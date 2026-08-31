@@ -7,10 +7,8 @@ import LoginPage from './pages/LoginPage.vue';
 import RestrictedPage from './pages/RestrictedPage.vue';
 
 PageRouter
-    .registerGlobalGuard({allowedRoles: ['admin']})
-    .registerDefaultPage({component: DashboardPage, menu: {position: 1}, guard: { allowedRoles: ['admin']}})
-    .registerPage({component: RestrictedPage, menu: {}, guard: { allowedRoles: ['lol']}})
-    .registerInvisiblePage({component: LoginPage, guard: {ignoreGlobalGuard: true}});
+    .registerDefaultPage({component: DashboardPage})
+    .registerInvisiblePage({component: LoginPage, guard: {isPublic: true}});
 
 function updatePageRouterIdentity(identity) {
     PageRouter.updateIdentity(

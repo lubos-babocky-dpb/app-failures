@@ -12,16 +12,16 @@
                 vapidPublicKey: "{{ config('services.webpush.public_key') }}"
             };
         </script>
-
+{{--
         <script>
             if ('serviceWorker' in navigator) {
                 // Použijeme sw-modular.js, ktorý vygeneruje Vite cez injectManifest
                 navigator.serviceWorker.register('/modular-sw.js')
-                    //.then(reg => console.log('Modulárny SW hotovo, beží.'))
+                    .then(reg => console.log('Modulárny SW hotovo, beží.'))
                     .catch(err => console.error('Modulárny SW zlyhal:', err));
             }
         </script>
-
+--}}
         @vite(['resources/css/app.css', 'resources/js/modular-app.js'])
     </head>
     <body class="bg-slate-100 text-slate-900 font-sans antialiased">

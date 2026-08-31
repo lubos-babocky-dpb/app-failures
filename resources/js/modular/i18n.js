@@ -6,7 +6,10 @@ const messages = {
             new_report: 'Nové hlásenie',
             history: 'História',
             failure_detail: 'Detail poruhy',
-            user_info: 'Profil'
+            user_info: 'Profil',
+            debug: 'Debug',
+            reportables: 'Zoznam vozidiel',
+            "new-form": 'Nový formulár',
         },
         report: {
             title: 'Nahlásiť novú poruchu',
@@ -14,7 +17,7 @@ const messages = {
             select_vehicle: 'Vyber vozidlo',
             description: 'Popis poruchy / Kategória',
             placeholder: 'Napr. nejdú otvoriť dvere...',
-            submit: 'Uložiť poruchu',
+            submit: 'Nahlásiť poruchu',
             success: 'Porucha bola uložená offline.',
             accepted: 'Hlásenie prijaté',
             success_sub: 'Porucha bola úspešne zaznamenaná do systému.',

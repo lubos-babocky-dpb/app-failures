@@ -11,10 +11,9 @@ export const syncStaticData = async () => {
     }
 
     try {
-        //console.log('Starting data synchronization...');
-
+        console.log('Starting data synchronization...');
         // 1. Synchronize Vehicles Registry
-        const vehicleResponse = await fetch('/api/v1/sync/vehicles');
+        const vehicleResponse = await fetch('api/failures/v1/reportables');
         if (!vehicleResponse.ok) throw new Error('Failed to fetch vehicles from server');
         const vehicles = await vehicleResponse.json();
         
@@ -23,7 +22,7 @@ export const syncStaticData = async () => {
         //console.log('Vehicles synchronized successfully.');
 
         // 2. Synchronize Failure Categories Tree
-        const categoryResponse = await fetch('/api/v1/sync/categories');
+        const categoryResponse = await fetch('api/failures/v1/categories');
         if (!categoryResponse.ok) throw new Error('Failed to fetch categories from server');
         const categories = await categoryResponse.json();
 

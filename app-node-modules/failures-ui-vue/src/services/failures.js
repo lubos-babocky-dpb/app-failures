@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Gatekeeper } from '@dpb/gatekeeper';
 
-const endpoint = '/failures-api/v1/admin/failures';
+const endpoint = '/api/failures/v1';
 
 function authHeaders() {
     return {

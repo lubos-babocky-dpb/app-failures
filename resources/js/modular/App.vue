@@ -6,16 +6,21 @@
   import NotificationContainer from './components/ui/NotificationContainer.vue';
   import SideNavigation from './components/ui/SideNavigation.vue';
   import Modal from './components/ui/Modal.vue';
+  import { FailuresApiService } from './api/failures-api-service.js';
 
   const personalAccessToken = ref(null);
+  const failuresApiService = new FailuresApiService({
+    bearerToken: Gatekeeper.token
+  });
 
   onMounted(async () => {
       try {
           personalAccessToken.value = Gatekeeper.token;
           Gatekeeper.addEventListener(IdentityUpdatedEvent.TYPE, (e) => { personalAccessToken.value = Gatekeeper.token; });
-          await syncStaticData();
-          await syncPendingFailures();
-          await syncFailureStatuses();
+
+          //await syncStaticData();
+          //await syncPendingFailures();
+          //await syncFailureStatuses();
       } catch (error) {
           console.warn('Inicializačná synchronizácia zlyhala (pravdepodobne offline režim):', error);
       }

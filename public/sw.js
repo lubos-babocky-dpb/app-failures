@@ -1,4 +1,5 @@
 // public/sw.js
+console.log('old service worker loaded!');
 
 // 1. Zachytenie push notifikácie a jej zobrazenie
 self.addEventListener('push', function (event) {

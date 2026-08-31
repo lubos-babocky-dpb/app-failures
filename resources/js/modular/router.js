@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import UserInfoPage from "./Pages/UserInfoPage.vue";
+import DebugPage from "./Pages/DebugPage.vue";
+import ReportPage from "./Pages/ReportPage.vue";
+import ReportableAssetsPage from "./Pages/ReportableAssetsPage.vue";
 
 const router = createRouter({
     history: createWebHistory('/'),
@@ -32,10 +35,37 @@ const router = createRouter({
             },
         },
         {
+            path: '/reportables',
+            component: ReportableAssetsPage,
+            meta: {
+                labelKey: 'nav.reportables',
+                icon: null,
+                isMenuItem: true
+            },
+        },
+        {
+            path: '/new-form',
+            component: ReportPage,
+            meta: {
+                labelKey: 'nav.new-form',
+                icon: null,
+                isMenuItem: true
+            },
+        },
+        {
             path: '/user-info',
             component: UserInfoPage,
             meta: {
                 labelKey: 'nav.user_info',
+                icon: null,
+                isMenuItem: true
+            },
+        },
+        {
+            path: '/debug',
+            component: DebugPage,
+            meta: {
+                labelKey: 'nav.debug',
                 icon: null,
                 isMenuItem: true
             },
