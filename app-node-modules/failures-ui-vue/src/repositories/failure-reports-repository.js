@@ -1,5 +1,6 @@
 import { liveQuery } from 'dexie';
 import { db } from '../db';
+import { toRaw } from 'vue';
 
 class FailureReportsRepository
 {
@@ -14,6 +15,10 @@ class FailureReportsRepository
     async replaceAll(failureReports) {
         await db.failureReports.clear();
         await db.failureReports.bulkPut(failureReports);
+    }
+
+    async save(failureReport) {
+        db.failureReports.add(toRaw(failureReport));
     }
 }
 

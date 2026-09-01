@@ -1,6 +1,6 @@
 <script setup>
     import { failuresUiVue } from '@dpb/failures-ui-vue';
-    import { onMounted, ref, watch } from 'vue';
+    import { ref, watch } from 'vue';
 
     const emit = defineEmits(['close']);
     const failureReport = defineModel();
@@ -28,14 +28,6 @@
         console.log('FailureReport updated: ', failureReport.value);
         emit('close');
     }
-
-    onMounted(() => {
-        //[L:] temp
-        failuresUiVue.reportableAssetsRepository.get(11).then((reportableAsset) => {
-            failureReport.value.reportableAsset = reportableAsset;
-        });
-    })
-
 </script>
 
 <template>

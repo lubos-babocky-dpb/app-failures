@@ -20,10 +20,8 @@ import FailureTypePicker from './FailureTypePicker.vue';
     <FormSection
         @activate="openCategoryPicker"
     >
-        <div class="space-y-2">
             <div 
                 :class="[failureReport.hasReportableAsset() ? 'opacity-100 cursor-pointer active:bg-slate-50' : 'opacity-50 pointer-events-none']"
-                class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 transition-opacity duration-300"
             >
                 <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
                     {{ t('report.description') }}
@@ -39,7 +37,7 @@ import FailureTypePicker from './FailureTypePicker.vue';
             <div v-if="categoryError" class="text-center text-sm font-black uppercase tracking-wide text-[#e30613] transition-all">
                 {{ categoryError }}
             </div>
-        </div>
+
     </FormSection>
     <Modal
         ref="failureTypePickerModal"

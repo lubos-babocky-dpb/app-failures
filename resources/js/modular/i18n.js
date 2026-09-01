@@ -15,7 +15,7 @@ const messages = {
             title: 'Nahlásiť novú poruchu',
             vehicle: 'Vozidlo',
             select_vehicle: 'Vyber vozidlo',
-            description: 'Popis poruchy / Kategória',
+            description: 'Druh poruchy / Kategória',
             placeholder: 'Napr. nejdú otvoriť dvere...',
             submit: 'Nahlásiť poruchu',
             success: 'Porucha bola uložená offline.',

@@ -9,54 +9,20 @@ export class FailureReport
     failureType;
     note;
     status;
+    photos;
 
-    constructor({uuid, userUuid, reportableAsset, failureType, note, status} = {}) {
+    constructor({uuid, userUuid, reportableAsset, failureType, note, status, photos} = {}) {
         this.uuid = uuid ?? crypto.randomUUID();
         this.userUuid = userUuid;
         this.reportableAsset = reportableAsset;
         this.failureType = failureType;
         this.note = note;
-        this.status = status ?? 'new'
+        this.status = status ?? 'new';
+        this.photos = photos ?? [];
     }
 
     static prepareNewFailureReport() {
         return new FailureReport();
-    }
-
-    get uuid() {
-        return this.uuid;
-    }
-
-    get userUuid() {
-        return this.userUuid;
-    }
-
-    get reportableAsset() {
-        return this.reportableAsset;
-    }
-
-    get failureType() {
-        return this.failureType;
-    }
-
-    get note() {
-        return this.note;
-    }
-
-    get status() {
-        return this.status;
-    }
-
-    set reportableAsset(reportableAsset) {
-        this.reportableAsset = reportableAsset;
-    }
-
-    set failureType(failureType) {
-        this.failureType = failureType;
-    }
-
-    set note(note) {
-        this.note = note;
     }
 
     hasReportableAsset() {
@@ -65,5 +31,13 @@ export class FailureReport
 
     hasFailureType() {
         return this.failureType instanceof FailureType;
+    }
+
+    hasFailureTypeAndReportableAsset() {
+        return this.hasFailureType() && this.hasReportableAsset();
+    }
+
+    attachPhoto(photo) {
+        this.photos.push(photo);
     }
 }
