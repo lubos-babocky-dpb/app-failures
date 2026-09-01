@@ -1,11 +1,10 @@
 <script setup>
-  import { ref, reactive, onMounted } from 'vue';
-  import { Gatekeeper, GatekeeperEvents, IdentityUpdatedEvent } from '@dpb/gatekeeper';
-  import { syncStaticData, syncPendingFailures, syncFailureStatuses } from './sync';
+  import { ref, onMounted } from 'vue';
+  import { Gatekeeper, IdentityUpdatedEvent } from '@dpb/gatekeeper';
   import LanguageMenu from './components/ui/LanguageMenu.vue';
   import NotificationContainer from './components/ui/NotificationContainer.vue';
   import SideNavigation from './components/ui/SideNavigation.vue';
-  import Modal from './components/ui/Modal.vue';
+
   import { FailuresApiService } from './api/failures-api-service.js';
 
   const personalAccessToken = ref(null);
@@ -17,10 +16,6 @@
       try {
           personalAccessToken.value = Gatekeeper.token;
           Gatekeeper.addEventListener(IdentityUpdatedEvent.TYPE, (e) => { personalAccessToken.value = Gatekeeper.token; });
-
-          //await syncStaticData();
-          //await syncPendingFailures();
-          //await syncFailureStatuses();
       } catch (error) {
           console.warn('Inicializačná synchronizácia zlyhala (pravdepodobne offline režim):', error);
       }
