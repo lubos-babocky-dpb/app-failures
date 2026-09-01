@@ -67,7 +67,7 @@
 
     const sendTestPush = async (type) => {
         const response = await fetch(
-            `http://localhost/api/push/send-test?type=${encodeURIComponent(type)}`,
+            `/api/push/send-test?type=${encodeURIComponent(type)}`,
             {
                 method: 'POST',
                 headers: {
