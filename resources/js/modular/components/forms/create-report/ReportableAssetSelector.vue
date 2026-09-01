@@ -9,21 +9,20 @@
     const failureReport = defineModel();
     const { t } = useI18n();
     const qrScannerModal = ref(null);
+    let qrScanner = null;
 
     const startQrScanner = () => {
         qrScannerModal.value.open();
 
         nextTick(() => {
-            new ReportableAssetQrScanner('qr-reader')
-                .scan()
+            qrScanner = new ReportableAssetQrScanner('qr-reader');
+            qrScanner.scan()
                 .then((qrCodeContent) => {
                     const reportableAssetId = Number(extractReportableAssetId(qrCodeContent));
                     failuresUiVue.reportableAssetsRepository
                         .get(reportableAssetId)
                         .then((reportableAssetData) => {
-                            console.log('reportableAssetData: ', reportableAssetData);
                             failureReport.value.reportableAsset = reportableAssetData;
-                            console.log('FailureReport after setter', failureReport.value);
                             qrScannerModal.value.close();
                         })
                 })
@@ -32,6 +31,11 @@
                     qrScannerModal.value.close();
                 });
         });
+    };
+
+    const stopQrScanner = async () => {
+        await qrScanner?.stop();
+        qrScanner = null;
     };
 
     const extractReportableAssetId = (text) => {
@@ -62,6 +66,7 @@
         ref="qrScannerModal"
         size="sm"
         content-padding="none"
+        @close="stopQrScanner"
     >
         <div id="qr-reader" class="w-full"></div>
     </Modal>
