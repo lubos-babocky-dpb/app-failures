@@ -1,10 +1,12 @@
 <script setup>
-    import { failuresUiVue } from '@dpb/failures-ui-vue';
+    import { FailureReport, failuresUiVue } from '@dpb/failures-ui-vue';
     import { onMounted, onUnmounted, ref } from 'vue';
     import ListItem from '../components/failure-history/ListItem.vue';
     import { Modal } from '@dpb/app-base-vue';
-import FailureReportDetail from '../components/failure-history/FailureReportDetail.vue';
+    import FailureReportDetail from '../components/failure-history/FailureReportDetail.vue';
+    import { useRoute } from 'vue-router';
 
+    const route = useRoute();
     const failureReports = ref([]);
     const detailModal = ref(null);
     const selectedFailureReport = ref(null);
@@ -21,6 +23,17 @@ import FailureReportDetail from '../components/failure-history/FailureReportDeta
             .subscribe(reports => {
                 failureReports.value = reports;
             });
+
+        const uuid = route.params.uuid;
+        if(uuid) {
+            failuresUiVue.failureReportsRepository
+                .get(uuid)
+                .then((failureReport) => {
+                    if(failureReport instanceof FailureReport) {
+                        showDetail(failureReport);
+                    }
+                });
+        }
     });
 
     onUnmounted(() => {

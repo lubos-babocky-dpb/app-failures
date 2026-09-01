@@ -27,10 +27,9 @@ const router = createRouter({
             },
         },
         {
-            path: '/history/detail/:uuid',
-            component: () => import('./Pages/FailureDetail.vue'),
+            path: '/history/:uuid',
+            component: FailureReportsHistory,
             meta: {
-                labelKey: 'nav.failure_detail',
                 icon: null,
                 isMenuItem: false
             },
