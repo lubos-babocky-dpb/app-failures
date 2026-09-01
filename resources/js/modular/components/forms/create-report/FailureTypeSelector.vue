@@ -2,7 +2,7 @@
     import { FormSection, Modal } from '@dpb/app-base-vue';
     import { ref } from 'vue';
     import { useI18n } from 'vue-i18n';
-import FailureTypePicker from './FailureTypePicker.vue';
+    import FailureTypePicker from './FailureTypePicker.vue';
 
     const failureReport = defineModel();
     const failureTypePickerModal = ref(null);

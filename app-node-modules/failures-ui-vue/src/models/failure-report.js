@@ -10,8 +10,9 @@ export class FailureReport
     note;
     status;
     photos;
+    createdAt;
 
-    constructor({uuid, userUuid, reportableAsset, failureType, note, status, photos} = {}) {
+    constructor({uuid, userUuid, reportableAsset, failureType, note, status, photos, createdAt} = {}) {
         this.uuid = uuid ?? crypto.randomUUID();
         this.userUuid = userUuid;
         this.reportableAsset = reportableAsset;
@@ -19,6 +20,7 @@ export class FailureReport
         this.note = note;
         this.status = status ?? 'new';
         this.photos = photos ?? [];
+        this.createdAt = createdAt ?? new Date().toISOString()
     }
 
     static prepareNewFailureReport() {

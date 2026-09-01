@@ -3,6 +3,7 @@ import UserInfoPage from "./Pages/UserInfoPage.vue";
 import DebugPage from "./Pages/DebugPage.vue";
 import ReportableAssetsPage from "./Pages/ReportableAssetsPage.vue";
 import CreateFailureReport from "./Pages/CreateFailureReport.vue";
+import FailureReportsHistory from "./Pages/FailureReportsHistory.vue";
 
 const router = createRouter({
     history: createWebHistory('/'),
@@ -18,7 +19,7 @@ const router = createRouter({
         },
         {
             path: '/history',
-            component: () => import('./Pages/FailureHistory.vue'),
+            component: FailureReportsHistory,
             meta: {
                 labelKey: 'nav.history',
                 icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
