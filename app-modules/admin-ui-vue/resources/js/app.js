@@ -4,7 +4,6 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import DashboardPage from './pages/DashboardPage.vue';
 import LoginPage from './pages/LoginPage.vue';
-import RestrictedPage from './pages/RestrictedPage.vue';
 
 PageRouter
     .registerDefaultPage({component: DashboardPage})

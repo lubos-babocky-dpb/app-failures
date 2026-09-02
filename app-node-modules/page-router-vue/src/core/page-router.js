@@ -140,18 +140,10 @@ class PageRouter {
     }
 
     #createRouteLabelFromComponent(component) {
-        const marker = '/pages/';
-        const position = component.__file.indexOf(marker);
-
-        if (position === -1) { return null; }
-
-        return component.__file.substring(position + marker.length)
-            .replace(/\.vue$/, '')
+        return component.__name
             .replace(/Page$/, '')
-            .replace(
-                /([a-z0-9])([A-Z])/g,
-                '$1-$2',
-            );
+            .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+            .toLowerCase();
     }
 
     #createRouteNameFromComponent(component) {
