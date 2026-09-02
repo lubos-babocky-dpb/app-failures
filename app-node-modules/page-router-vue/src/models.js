@@ -1,28 +1,23 @@
 export class Identity {
-    #roles;
-    #permissions;
+    #user;
 
-    constructor(
-        roles = [],
-        permissions = []
-    ) {
-        this.#roles = roles;
-        this.#permissions = permissions
+    constructor(user) {
+        this.updateIdentity(user);
     }
 
-    updateIdentity(
-        roles = [],
-        permissions = []
-    ) {
-        this.#roles = roles;
-        this.#permissions = permissions;
+    updateIdentity(user = null) {
+        this.#user = user;
+    }
+
+    isAuthenticated() {
+        return this.#user !== null;
     }
 
     hasRole(role) {
-        return this.#roles.includes(role);
+        return this.#user?.privileges?.roles?.includes(role) ?? false;
     }
 
     hasPermission(permission) {
-        return this.#permissions.includes(permission);
+        return this.#user?.privileges?.permissions?.includes(permission) ?? false;
     }
 }

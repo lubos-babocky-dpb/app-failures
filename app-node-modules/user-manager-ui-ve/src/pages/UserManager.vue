@@ -1,10 +1,9 @@
 <script setup>
-    import { UserManagerApiService } from '../api/UserManagerApiService';
-    import { Gatekeeper } from '@dpb/gatekeeper';
-
-    const userManagerApiService = new UserManagerApiService({
-        baseUrl: 'http://localhost/',
-        bearerToken: Gatekeeper.token
+    defineOptions({
+        router: {
+            pageName: 'UserManager',
+            requiredAnyPermission: ['page-access.user-manager']
+        },
     });
 
 </script>

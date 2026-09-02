@@ -7,76 +7,119 @@ class PageRouter {
     #globalGuard = null;
     #router;
     #identity = new Identity();
+    #defaultAccess = 'authenticated';
 
     constructor() {
         const modules = import.meta.glob(
-            '/app-node-modules/*/src/routes.js',
-            {eager: true}
+            [
+                '/**/src/pages/**/*.vue',
+                '/**/js/pages/**/*.vue'
+            ],
+            { eager: true }
         );
 
         for (const module of Object.values(modules)) {
-            if (typeof module.registerModulePages === 'function') {
-                module.registerModulePages(this);
+            if(module.default?.router?.pageName) {
+                const routePath = this.#buildRoutePathFromComponent(module.default);
+                if(!this.#routes?.some(route => route.path === routePath)) {
+                    this.registerPage(module.default);
+                }
             }
         }
     }
 
-    createRouter(options) {
+    createRouter({
+        baseUrl = '/',
+        startPages = [],
+        defaultAccess = 'authenticated'
+    } = {}) {
+        this.#defaultAccess = defaultAccess;
+
+        const startPage = startPages.find(
+            component => this.#hasAccess(
+                component.router?.access ?? this.#defaultAccess
+            )
+        );
+
+        if (!startPage) {
+            throw new Error('No accessible start page found');
+        }
+
+        this.registerStartPage(startPage);
+
+
         this.#router = createRouter({
-            history: createWebHistory(options.base),
+            history: createWebHistory(baseUrl),
             routes: [
                 ...this.#routes,
+                // [L:] fallback
+                {path: '/:pathMatch(.*)*', redirect: '/'}
             ],
         });
+
         this.#registerGuards();
         return this.#router;
     }
 
-    updateIdentity(
-        roles = [],
-        permissions = []
-    ) {
-        this.#identity.updateIdentity(roles, permissions);
-    }
-
-    registerInvisiblePage({component, route = null, guard = null}) {
+    registerPage(component) {
         this.#routes.push({
-            path: route?.path ?? this.#createRoutePathFromComponent(component),
-            name: route?.name ?? this.#createRouteNameFromComponent(component),
-            component,
-            meta: {
-                guard: guard ?? null
-            }
+            path: this.#buildRoutePathFromComponent(component),
+            name: this.#buildRouteNameFromComponent(component),
+            component: component
         });
+
+        if (!component.router?.hideInMenu) {
+            this.#menuItems.push({
+                label: this.#buildRouteLabelFromComponent(component),
+                route: this.#buildRouteNameFromComponent(component),
+                access: component.router.access ?? null,
+                guard: component.router.guard ?? null,
+                position: component.router?.menuPosition ?? 10 * this.#menuItems.length
+            });
+        }
+
         return this;
     }
 
-    registerDefaultPage({component, route = null, menu = null, guard = null}) {
-        return this.registerPage({
-            component: component,
-            route: route ?? { path: '/' },
-            menu: menu ?? {},
-            guard: guard
-        });
+    registerStartPage(component) {
+        const route = this.#routes.find(
+            route => route.name === this.#buildRouteNameFromComponent(component)
+        );
+
+        if (!route) {
+            throw new Error('Start page is not registered');
+        }
+
+        route.path = `/`;
     }
 
-    registerPage({component, route = null, menu = {}, guard = null}) {
-        this.#routes.push({
-            path: route?.path ?? this.#createRoutePathFromComponent(component),
-            name: route?.name ?? this.#createRouteNameFromComponent(component),
-            component: component,
-            meta: {
-                guard: guard ?? null
-            }
-        });
+    #buildRoutePathFromComponent(component) {
+        const routePath = this.#convertString(
+            component.router?.path ?? component.router.pageName
+        );
+        return `/${routePath}`;
+    }
 
-        this.#menuItems.push({
-            label: menu.label ?? this.#createRouteLabelFromComponent(component),
-            route: route?.name ?? this.#createRouteNameFromComponent(component),
-            guard: guard ?? null,
-            position: menu.position ?? 10 * this.#menuItems.length
-        });
-        return this;
+    #buildRouteNameFromComponent(component) {
+        return this.#convertString(
+            component.router?.name ?? component.router.pageName
+        );
+
+    }
+
+    #buildRouteLabelFromComponent(component) {
+        return component.router?.label ?? component.router.pageName;
+    }
+
+    #convertString(inputString) {
+        return inputString
+            .replace(/^\/+/, '')
+            .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+            .toLowerCase();
+    }
+
+    updateIdentity(user) {
+        this.#identity.updateIdentity(user);
     }
 
     get routes() {
@@ -89,7 +132,10 @@ class PageRouter {
         }
 
         return  this.#menuItems
-            .filter(item => this.#isAllowed(item.guard))
+            .filter(item =>
+                this.#hasAccess(item.access ?? this.#defaultAccess) &&
+                this.#isAllowed(item.guard)
+            )
             .sort((a, b) => a.position - b.position)
             .map(item => ({ ...item }));
     }
@@ -108,7 +154,7 @@ class PageRouter {
     }
 
     #isAllowed(guardConfig) {
-        if (!guardConfig || guardConfig.isPublic) {
+        if (!guardConfig) {
             return true;
         }
 
@@ -127,51 +173,38 @@ class PageRouter {
         return false;
     }
 
+    #hasAccess(access) {
+        if (access === 'authenticated') {
+            return this.#identity.isAuthenticated();
+        }
+
+        if (access === 'anonymous') {
+            return !this.#identity.isAuthenticated();
+        }
+
+        return false;
+    }
+
     #registerGuards() {
         this.#router.beforeEach((to) => {
-            const guardConfig = to.meta.guard;
-            if (!guardConfig?.ignoreGlobalGuard) {
-                if (!this.#isAllowed(this.#globalGuard)) {
-                    return false;
-                }
+            const routerConfig = this.#loadComponent(to.name)?.router;
+
+            const access = routerConfig?.access ?? this.#defaultAccess;
+
+            if (!this.#hasAccess(access)) {
+                return { path: '/' };
             }
-            return this.#isAllowed(guardConfig);
+
+            if (!this.#isAllowed(routerConfig?.guard)) {
+                return { path: '/' };
+            }
+
+            return true;
         });
     }
 
-    #createRouteLabelFromComponent(component) {
-        if (component.__name) {
-            return component.__name
-                .replace(/Page$/, '')
-                .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-                .toLowerCase();
-        }
-
-        if (component.__file) {
-            const marker = '/pages/';
-            const position = component.__file.indexOf(marker);
-
-            if (position === -1) {
-                return null;
-            }
-
-            return component.__file
-                .substring(position + marker.length)
-                .replace(/\.vue$/, '')
-                .replace(/Page$/, '')
-                .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-                .toLowerCase();
-        }
-
-        return null;
-    }
-
-    #createRouteNameFromComponent(component) {
-        return this.#createRouteLabelFromComponent(component).toLowerCase();
-    }
-
-    #createRoutePathFromComponent(component) {
-        return `/${this.#createRouteNameFromComponent(component)}`;
+    #loadComponent(routeName) {
+        return this.#routes.find(route => route.name === routeName)?.component;
     }
 }
 

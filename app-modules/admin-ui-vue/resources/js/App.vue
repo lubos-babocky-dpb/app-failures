@@ -1,15 +1,16 @@
 <script setup>
-    import { computed, onMounted, onUnmounted, ref } from 'vue';
+    import { onMounted, onUnmounted, ref } from 'vue';
     import { PageRouter } from '@dpb/page-router-vue';
     import { Gatekeeper, IdentityUpdatedEvent } from '@dpb/gatekeeper';
     import LogoutButton from './components/actions/LogoutButton.vue';
 
-    const menuItems = PageRouter.menuItems;
+    const menuItems = ref(PageRouter.menuItems);
 
     const currentUser = ref(Gatekeeper.identity?.user ?? null);
 
     function handleIdentityUpdated() {
         currentUser.value = Gatekeeper.identity?.user ?? null;
+        menuItems.value = PageRouter.menuItems;
     }
 
     onMounted(() => Gatekeeper.addEventListener(IdentityUpdatedEvent.TYPE, handleIdentityUpdated));

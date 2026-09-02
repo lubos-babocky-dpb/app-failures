@@ -1,5 +1,13 @@
 <script setup>
     import LoginForm from '../components/forms/LoginForm.vue';
+
+    defineOptions({
+        router: {
+            pageName: 'Login',
+            access: 'anonymous',
+            hideInMenu: true
+        },
+    });
 </script>
 
 <template>

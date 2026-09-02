@@ -5,16 +5,9 @@ import App from './App.vue';
 import DashboardPage from './pages/DashboardPage.vue';
 import LoginPage from './pages/LoginPage.vue';
 
-PageRouter
-    .registerDefaultPage({component: DashboardPage})
-    .registerInvisiblePage({component: LoginPage, guard: {isPublic: true}});
-
 function updatePageRouterIdentity(identity) {
-    PageRouter.updateIdentity(
-        identity.user?.privileges?.roles ?? [],
-        identity.user?.privileges?.permissions ?? [],
-    );
-}
+    PageRouter.updateIdentity(identity.user);
+};
 
 updatePageRouterIdentity(Gatekeeper.identity);
 
@@ -22,8 +15,13 @@ Gatekeeper.addEventListener(IdentityUpdatedEvent.TYPE, (event) => {
     updatePageRouterIdentity(event.identity);
 });
 
-const router = PageRouter.createRouter({ base: '/admin/'});
-
 createApp(App)
-    .use(router)
+    .use(PageRouter.createRouter({
+        baseUrl: 'admin',
+        startPages: [
+            LoginPage,
+            DashboardPage,
+        ],
+        defaultAccess: 'authenticated'
+    }))
     .mount('#admin');

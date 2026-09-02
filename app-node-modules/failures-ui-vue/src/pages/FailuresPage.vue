@@ -1,9 +1,16 @@
 <script setup>
     import { onMounted, ref } from 'vue';
-
+    import { failuresUiVue } from '../index';
     import FailureBrowser from '../components/FailureBrowser.vue';
     import { fetchCategories, fetchFailureTypes } from '../services/failures.js';
     import { buildFailureTree } from '../utils/build-failure-free.js';
+
+    defineOptions({
+        router: {
+            pageName: 'FailuresPage',
+            requiredAnyPermission: ['page-access.failures']
+        },
+    });
 
     const tree = ref([]);
     const loading = ref(true);
@@ -12,8 +19,8 @@
     async function loadFailures() {
         try {
             const [categories, failureTypes] = await Promise.all([
-                fetchCategories(),
-                fetchFailureTypes(),
+                failuresUiVue.failureCategoriesRepository.all(),
+                failuresUiVue.failureTypesRepository.all(),
             ]);
 
             tree.value = buildFailureTree(
