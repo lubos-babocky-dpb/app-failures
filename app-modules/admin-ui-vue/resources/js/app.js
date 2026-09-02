@@ -5,6 +5,14 @@ import App from './App.vue';
 import DashboardPage from './pages/DashboardPage.vue';
 import LoginPage from './pages/LoginPage.vue';
 
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+        .register('/modular-sw.js', { type: 'module' })
+        .catch(error => {
+            console.error('Service Worker registration failed:', error);
+        });
+}
+
 function updatePageRouterIdentity(identity) {
     PageRouter.updateIdentity(identity.user);
 };
