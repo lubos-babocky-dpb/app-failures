@@ -1,6 +1,6 @@
 export const PushSubscriptionEndpoints = {
     CREATE: {
-        url: 'api/push-subscription',
+        url: 'api/sanctuary/v1/push-subscription',
         method: 'POST',
     },
 };

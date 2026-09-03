@@ -36,9 +36,7 @@ export class PushSubscriptionService
     {
         return this.#apiClient.request(
             PushSubscriptionEndpoints.CREATE,
-            {
-                subscription: subscription.toJSON(),
-            },
+            subscription.toJSON(),
         );
     }
 

@@ -1,4 +1,6 @@
 <script setup>
+import { Gatekeeper } from '@dpb/gatekeeper';
+
     async function syncReportables() {
         const registration = await navigator.serviceWorker.ready;
 
@@ -19,6 +21,7 @@
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
+                    'Authorization': `Bearer ${Gatekeeper.token}`,
                 },
             }
         );
