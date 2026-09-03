@@ -1,4 +1,4 @@
-import { ApiClient } from '@dpb/app-base-vue/api/ApiClient';
+import { ApiClient } from '@dpb/app-base';
 import { UserEndpoints } from "./endpoints";
 
 export class UserManagerApiService {

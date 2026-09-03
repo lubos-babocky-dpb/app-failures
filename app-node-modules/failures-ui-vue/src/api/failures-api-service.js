@@ -1,4 +1,4 @@
-import { ApiClient } from '@dpb/app-base-vue/api/ApiClient';
+import { ApiClient } from '@dpb/app-base';
 import * as Endpoints from "./endpoints";
 
 class FailuresApiService

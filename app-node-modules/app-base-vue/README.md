@@ -13,7 +13,6 @@ Balíček môže obsahovať:
 - znovupoužiteľné Vue komponenty
 - JavaScript helpery
 - utility triedy
-- všeobecné API nástroje
 - spoločné UI stavebné bloky
 - ďalšie všeobecne použiteľné frontendové nástroje
 
@@ -27,7 +26,6 @@ Príklady komponentov:
 
 Príklady JavaScript nástrojov:
 
-- API klienti
 - helper triedy
 - utility objekty
 - všeobecné frontendové abstrakcie
@@ -47,12 +45,6 @@ Projekt, v ktorom je balíček použitý, musí obsahovať kompatibilnú verziu 
 ---
 
 ## Použitie
-
-Komponenty a JavaScript nástroje sa importujú z balíčka podľa ich exportu.
-
-```js
-import { ApiClient } from '@dpb/app-base-vue';
-```
 
 Vue komponenty je možné používať v ďalších Vue komponentoch:
 
@@ -130,93 +122,6 @@ Môže byť použitý napríklad pre:
 
 ---
 
-# JavaScript nástroje
-
-## ApiClient
-
-Základný klient pre komunikáciu s HTTP API.
-
-```js
-import { ApiClient } from '@dpb/app-base-vue';
-
-const apiClient = new ApiClient({
-    baseUrl: '/api',
-});
-```
-
-Klient podporuje konfiguráciu základnej URL a Bearer tokenu.
-
-```js
-const apiClient = new ApiClient({
-    baseUrl: 'https://example.com/api',
-    bearerToken: 'token',
-});
-```
-
-### Konfigurácia
-
-Základnú URL je možné zmeniť aj po vytvorení klienta.
-
-```js
-apiClient.configure('/api');
-```
-
-### Request
-
-```js
-const response = await apiClient.request(
-    {
-        url: '/users',
-        method: 'GET',
-    }
-);
-```
-
-Request s dátami:
-
-```js
-const response = await apiClient.request(
-    {
-        url: '/users',
-        method: 'POST',
-    },
-    {
-        name: 'John Doe',
-    }
-);
-```
-
-Request s vlastným tokenom:
-
-```js
-const response = await apiClient.request(
-    {
-        url: '/users',
-        method: 'GET',
-    },
-    null,
-    'custom-token'
-);
-```
-
-Request s dodatočnými headers:
-
-```js
-const response = await apiClient.request(
-    {
-        url: '/users',
-        method: 'GET',
-    },
-    null,
-    null,
-    {
-        'X-Custom-Header': 'value',
-    }
-);
-```
-
----
-
 # Architektúra
 
 Balíček je určený pre všeobecne použiteľné komponenty a nástroje.
@@ -235,9 +140,6 @@ Napríklad:
 │   │   └── FormSection.vue
 │   │
 │   └── ...
-│
-├── api
-│   └── ApiClient.js
 │
 ├── helpers
 │   └── ...
@@ -274,7 +176,6 @@ Napríklad:
 ```text
 ✓ Modal
 ✓ FormSection
-✓ ApiClient
 ✓ všeobecný input komponent
 ✓ všeobecný button komponent
 ✓ všeobecný date picker
@@ -295,7 +196,6 @@ Napríklad:
 ✗ FailureSelector
 ✗ ReportableAssetRepository
 ✗ konkrétna logika nahlasovania poruchy
-✗ konkrétne API endpointy aplikácie
 ```
 
 Takáto funkcionalita patrí do balíčka alebo aplikácie, ktorá vlastní príslušnú doménu.
@@ -318,7 +218,6 @@ Príklad:
 docs/
 ├── Modal.md
 ├── FormSection.md
-├── ApiClient.md
 └── ...
 ```
 

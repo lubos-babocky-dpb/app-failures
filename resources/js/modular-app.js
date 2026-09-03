@@ -5,7 +5,8 @@ import router from "./modular/router.js";
 import { i18n } from "./modular/i18n.js";
 import Pusher from "pusher-js";
 import Echo from "laravel-echo";
-import { failuresUiVue } from "../../app-node-modules/failures-ui-vue/src/index.js";
+import { failuresUiVue } from "@dpb/failures-ui-vue";
+import { ApiClient, PushSubscriptionService } from "@dpb/app-base";
 
 
 window.Pusher = Pusher;
@@ -27,15 +28,28 @@ echo.channel("reportables")
 Gatekeeper.setBaseUrl('/');
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-        .register('/modular-sw.js', { type: 'module' })
-//        .then(registration => { console.log('SW registered:', registration); })
-        .catch(error => { console.error('SW registration failed:', error); });
+    try {
+        await navigator.serviceWorker.register('/modular-sw.js', { type: 'module' });
+
+        const apiClient = new ApiClient({
+            baseUrl: '',
+            bearerToken: Gatekeeper.token
+        });
+
+        const pushSubscriptionService = new PushSubscriptionService({
+            vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+            apiClient: apiClient
+        });
+        const subscription = await pushSubscriptionService.getOrCreateSubscription();
+        console.log('Push subscription:', subscription);
+    } catch (error) {
+        console.error('Push initialization failed', error);
+    }
 }
 
 await failuresUiVue.initialize();
 
-const app = createApp(App);
-app.use(router);
-app.use(i18n);
-app.mount('#app');
+createApp(App)
+    .use(router)
+    .use(i18n)
+    .mount('#app');
