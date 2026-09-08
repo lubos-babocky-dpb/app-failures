@@ -1,5 +1,5 @@
 <script setup>
-    import { onMounted, ref } from "vue";
+    import { onMounted, ref, toRaw } from "vue";
     import FailureTypeSelector from '../components/forms/create-report/FailureTypeSelector.vue';
     import NoteBox from '../components/forms/create-report/NoteBox.vue';
     import PhotoBox from '../components/forms/create-report/PhotoBox.vue';
@@ -7,14 +7,16 @@
     import { FailureReport, failuresUiVue } from "@dpb/failures-ui-vue";
     import { Button, Modal } from "@dpb/app-base-vue";
     import router from '../router.js';
+    import { Gatekeeper } from "@dpb/gatekeeper";
 
     const debug = true;
     const failureReport = ref(FailureReport.prepareNewFailureReport());
     const failureReportCreatedModal = ref(null);
 
     const submitNewFailureReport = () => {
-        failuresUiVue.failureReportsRepository
-            .save(failureReport.value)
+        console.log(failuresUiVue);
+        failureReport.value.userUuid = Gatekeeper.deviceUuid;
+        failuresUiVue.createFailureReport(toRaw(failureReport.value))
             .then(() => {
                 failureReport.value = FailureReport.prepareNewFailureReport();
                 failureReportCreatedModal.value.open();

@@ -23,5 +23,9 @@ export const FailureReportsEndpoints = {
     READ: {
         url: 'api/failures/v1/failure-report',
         method: 'GET'
+    },
+    CREATE: {
+        url: 'api/failures/v1/failure-report',
+        method: 'POST'
     }
 };

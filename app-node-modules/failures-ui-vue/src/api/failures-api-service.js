@@ -1,7 +1,7 @@
 import { ApiClient } from '@dpb/app-base';
 import * as Endpoints from "./endpoints";
 
-class FailuresApiService
+export class FailuresApiService
 {
     #apiClient;
 
@@ -42,6 +42,12 @@ class FailuresApiService
             Endpoints.FailureReportsEndpoints.READ
         );
     };
-}
 
-export const failuresApiService = new FailuresApiService();
+    async createFailureReport(failureReport) {
+        console.log(this.#apiClient);
+        return this.#apiClient.request(
+            Endpoints.FailureReportsEndpoints.CREATE,
+            {failureReport: failureReport}
+        );
+    }
+}

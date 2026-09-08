@@ -16,6 +16,7 @@ export class FailuresApiService
             bearerToken: bearerToken
         })
     } = {}) {
+        console.warn('DO NOT USE ME!!!!');
         this.#apiClient = apiClient;
     }
 

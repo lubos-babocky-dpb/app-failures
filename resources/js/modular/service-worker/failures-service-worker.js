@@ -8,9 +8,7 @@ export class FailuresServiceWorker
 
     async initialize() {
         const { Gatekeeper } = await import('@dpb/gatekeeper');
-        this.#failuresSynchronizer = new FailuresSynchronizer(
-            Gatekeeper.token
-        );
+        this.#failuresSynchronizer = new FailuresSynchronizer(Gatekeeper.token);
 
         this.#pushNotifications = new PushNotifications();
         this.#registerListeners();
@@ -21,6 +19,7 @@ export class FailuresServiceWorker
         self.addEventListener('message', event => {
             console.log('SW MESSAGE RECEIVED:', event.data);
             const syncHandlers = {
+                'sync-initial-data': () => this.#syncInitialData(),
                 'sync-reportable-assets': () => this.#syncReportableAssets(),
                 'sync-failure-types': () => this.#syncFailureTypes(),
                 'sync-failure-categories': () => this.#syncFailureCategories(),
@@ -33,7 +32,18 @@ export class FailuresServiceWorker
         });
     }
 
+    async #syncInitialData() {
+        console.log('sync initial data');
+        await Promise.all([
+            this.#syncReportableAssets(),
+            this.#syncFailureTypes(),
+            this.#syncFailureCategories(),
+            this.#syncFailureReports(),
+        ]);
+    }
+
     #registerPushNotificationEvents() {
+        this.#pushNotifications.register('sync-initial-data', () => this.#syncInitialData());
         this.#pushNotifications.register('sync-reportable-assets', () => this.#syncReportableAssets());
         this.#pushNotifications.register('sync-failure-types', () => this.#syncFailureTypes());
         this.#pushNotifications.register('sync-failure-categories', () => this.#syncFailureCategories());

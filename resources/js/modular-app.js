@@ -30,12 +30,9 @@ Gatekeeper.setBaseUrl('/');
 if ('serviceWorker' in navigator) {
     try {
         await navigator.serviceWorker.register('/modular-sw.js', { type: 'module' });
-
-        const apiClient = new ApiClient({
-            baseUrl: '',
-            bearerToken: Gatekeeper.token
-        });
-
+        const registration = await navigator.serviceWorker.ready;
+        registration.active.postMessage({type: 'sync-initial-data'});
+        const apiClient = new ApiClient({baseUrl: '', bearerToken: Gatekeeper.token});
         const pushSubscriptionService = new PushSubscriptionService({
             vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
             apiClient: apiClient
@@ -47,7 +44,7 @@ if ('serviceWorker' in navigator) {
     }
 }
 
-await failuresUiVue.initialize();
+await failuresUiVue.initialize({ bearerToken: Gatekeeper.token });
 
 createApp(App)
     .use(router)

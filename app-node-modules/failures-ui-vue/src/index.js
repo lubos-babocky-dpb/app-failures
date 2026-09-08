@@ -1,19 +1,22 @@
 import { db } from "./db";
-import { failuresApiService } from "./api/failures-api-service";
+
 import { failureCategoriesRepository } from "./repositories/failure-categories-repository";
 import { failureReportsRepository } from "./repositories/failure-reports-repository";
 import { failureTypesRepository } from "./repositories/failure-types-repository";
 import { reportableAssetsRepository } from "./repositories/reportable-assets-repository";
-import { FailureCategory } from "./models/failure-category";
-import { FailureType } from "./models/failure-type";
-import { FailureReport } from "./models/failure-report";
-import { ReportableAsset } from "./models/reportable-asset";
+import { FailuresApiService } from "./api/failures-api-service";
 
 class FailuresUiVue
 {
-    async initialize()
+    #api = null;
+
+    async initialize({baseUrl = '/', bearerToken = null} = {})
     {
         await db.open();
+        this.#api = new FailuresApiService({
+            baseUrl: baseUrl,
+            bearerToken: bearerToken
+        });
     }
 
     get failureCategoriesRepository() {
@@ -33,7 +36,12 @@ class FailuresUiVue
     }
 
     get api() {
-        return failuresApiService;
+        return this.#api;
+    }
+
+    async createFailureReport(failureReport) {
+        this.failureReportsRepository.save(failureReport);
+        this.api.createFailureReport(failureReport);
     }
 }
 
