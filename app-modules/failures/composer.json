@@ -1,0 +1,18 @@
+{
+    "name": "dpb/failures",
+    "description": "Module for managing and reporting vehicle technical failures for DPB",
+    "type": "library",
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "Dpb\\Failures\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Dpb\\Failures\\Providers\\FailuresServiceProvider"
+            ]
+        }
+    }
+}
