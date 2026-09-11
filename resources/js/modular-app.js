@@ -25,14 +25,14 @@ echo.channel("reportables")
         console.log("REPORTABLES CHANGED:", event);
     });
 
-Gatekeeper.setBaseUrl(import.meta.env.APP_URL);
-console.log(import.meta.env);
+Gatekeeper.setBaseUrl(globalThis.location.origin);
+
 if ('serviceWorker' in navigator) {
     try {
         await navigator.serviceWorker.register('/modular-sw.js', { type: 'module' });
         const registration = await navigator.serviceWorker.ready;
         registration.active.postMessage({type: 'sync-initial-data'});
-        const apiClient = new ApiClient({baseUrl: import.meta.env.APP_URL, bearerToken: Gatekeeper.token});
+        const apiClient = new ApiClient({baseUrl: globalThis.location.origin, bearerToken: Gatekeeper.token});
         const pushSubscriptionService = new PushSubscriptionService({
             vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
             apiClient: apiClient

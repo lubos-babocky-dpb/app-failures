@@ -4,7 +4,7 @@ export class ApiClient {
     /** @type {string|null} */ #bearerToken;
 
     constructor({
-        baseUrl = '',
+        baseUrl = globalThis.location.origin,
         bearerToken = null
     } = {}) {
         this.#baseUrl = baseUrl;
