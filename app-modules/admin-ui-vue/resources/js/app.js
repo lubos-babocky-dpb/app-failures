@@ -14,7 +14,7 @@ if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.ready;
         registration.active.postMessage({type: 'sync-initial-data'});
         registration.active.postMessage({type: 'sync-user-manager-data'});
-        const apiClient = new ApiClient({baseUrl: 'http://localhost/', bearerToken: Gatekeeper.token});
+        const apiClient = new ApiClient({baseUrl: import.meta.env.APP_URL, bearerToken: Gatekeeper.token});
         const pushSubscriptionService = new PushSubscriptionService({
             vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
             apiClient: apiClient
