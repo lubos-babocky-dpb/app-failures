@@ -9,7 +9,7 @@ export class FailuresApiService
      * @param {ApiClient} apiClient 
      */
     constructor({
-        baseUrl = '',
+        baseUrl = globalThis.location.origin,
         bearerToken = null,
         apiClient = new ApiClient({
             baseUrl: baseUrl,
