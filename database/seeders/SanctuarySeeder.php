@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -34,6 +35,7 @@ class SanctuarySeeder extends Seeder
         Schema::enableForeignKeyConstraints();
 
         $user = User::create([
+            'uuid' => Str::uuid(),
             'name' => 'Admin',
             'email' => 'admin@dpb.sk',
             'personal_id' => '99999',
