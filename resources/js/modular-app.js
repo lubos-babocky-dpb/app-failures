@@ -25,7 +25,7 @@ echo.channel("reportables")
         console.log("REPORTABLES CHANGED:", event);
     });
 
-Gatekeeper.setBaseUrl('http://localhost/');
+Gatekeeper.setBaseUrl(import.meta.env.APP_URL);
 
 if ('serviceWorker' in navigator) {
     try {
