@@ -26,13 +26,13 @@ echo.channel("reportables")
     });
 
 Gatekeeper.setBaseUrl(import.meta.env.APP_URL);
-
+console.log(import.meta.env);
 if ('serviceWorker' in navigator) {
     try {
         await navigator.serviceWorker.register('/modular-sw.js', { type: 'module' });
         const registration = await navigator.serviceWorker.ready;
         registration.active.postMessage({type: 'sync-initial-data'});
-        const apiClient = new ApiClient({baseUrl: '', bearerToken: Gatekeeper.token});
+        const apiClient = new ApiClient({baseUrl: import.meta.env.APP_URL, bearerToken: Gatekeeper.token});
         const pushSubscriptionService = new PushSubscriptionService({
             vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
             apiClient: apiClient
