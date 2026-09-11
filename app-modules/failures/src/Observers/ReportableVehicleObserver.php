@@ -11,6 +11,7 @@ class ReportableVehicleObserver
     public function __construct(
         private readonly Dispatcher $dispatcher
     ) {}
+
     public function created(
         ReportableVehicle $reportableVehicle
     ): void {

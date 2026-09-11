@@ -7,7 +7,7 @@ db.version(1).stores({
     permissions: 'uuid'
 });
 
-export const failureDb = Object.freeze({
+export const userManagerDb = Object.freeze({
     users: db.users,
     roles: db.roles,
     permissions: db.permissions

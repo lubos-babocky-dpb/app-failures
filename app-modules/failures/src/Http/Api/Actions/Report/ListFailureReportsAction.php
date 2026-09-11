@@ -15,7 +15,6 @@ class ListFailureReportsAction
         Request $request
     ) {
         $failureReports = FailureReport::query()
-            ->orderBy('path')
             ->orderBy('id')
             ->get()
             ->map(static function (FailureReport $report): array {

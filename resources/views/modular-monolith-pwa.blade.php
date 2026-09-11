@@ -8,9 +8,7 @@
         <title>Hlásenie poruchy (Modulárny Monolit)</title>
         
         <script>
-            window.config = {
-                vapidPublicKey: "{{ config('services.webpush.public_key') }}"
-            };
+            window.config = { vapidPublicKey: "{{ config('services.webpush.public_key') }}" };
         </script>
         @vite(['resources/css/app.css', 'resources/js/modular-app.js'])
     </head>

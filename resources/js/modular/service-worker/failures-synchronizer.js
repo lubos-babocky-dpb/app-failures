@@ -1,4 +1,4 @@
-import { failuresUiVue } from "../../../../app-node-modules/failures-ui-vue/src";
+import { failuresUiVue } from "@dpb/failures-ui-vue";
 import { FailuresApiService } from "../api/failures-api-service";
 
 export class FailuresSynchronizer
@@ -15,7 +15,6 @@ export class FailuresSynchronizer
         const reportableAssets = await this.#apiService.getReportableAssets();
         await failuresUiVue.initialize();
         await failuresUiVue.reportableAssetsRepository.replaceAll(reportableAssets);
-        console.log('syncing reportable assets', reportableAssets);
         return reportableAssets;
     }
 
@@ -23,7 +22,6 @@ export class FailuresSynchronizer
         const failureTypes = await this.#apiService.getFailureTypes();
         await failuresUiVue.initialize();
         await failuresUiVue.failureTypesRepository.replaceAll(failureTypes);
-        console.log('syncing failure types', failureTypes);
         return failureTypes;
     }
 
@@ -31,7 +29,6 @@ export class FailuresSynchronizer
         const failureCategories = await this.#apiService.getFailureCategories();
         await failuresUiVue.initialize();
         await failuresUiVue.failureCategoriesRepository.replaceAll(failureCategories);
-        console.log('syncing failure categories', failureCategories);
         return failureCategories;
     }
 
@@ -39,7 +36,6 @@ export class FailuresSynchronizer
         const failureReports = await this.#apiService.getFailureReports();
         await failuresUiVue.initialize();
         await failuresUiVue.failureReportsRepository.replaceAll(failureReports);
-        console.log('syncing failure reports', failureReports);
         return failureReports;
     }
 }

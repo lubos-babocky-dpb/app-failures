@@ -1,6 +1,5 @@
 <script setup>
     import { DataTable, Modal } from '@dpb/app-base-vue';
-    import { failuresUiVue } from '@dpb/failures-ui-vue';
     import { ref } from 'vue';
     import { userRepository } from '../repositories/user-repository';
 
@@ -11,30 +10,39 @@
         },
     });
 
+    const edit = (row) => console.log('Edit: ', row);
+    const remove = (row) => console.log('Remove: ', row);
+
     const columns = [
         {
-            field: 'code',
-            label: 'Kód',
+            label: 'Meno',
+            field: 'name',
             action: row => {
                 console.log('User clicked:', row);
             },
         },
 
         {
-            field: 'model.name',
-            label: 'Model',
+            label: 'e-Mail',
+            field: 'email',
         },
 
         {
-            field: 'type.name',
-            label: 'Typ',
+            label: 'PID',
+            field: 'personal_id',
+        },
+    
+        {
+            label: 'Admin',
+            content: row => row.email === 'admin@dpb.sk' ? 'Y' : 'N'
         },
 
         {
-            label: 'Upraviť',
-            action: row => {
-                console.log('Edit:', row);
-            },
+            label: 'Akcie',
+            content: [
+                {type: 'button', label: 'Upraviť', action: row => edit(row)},
+                {type: 'button', label: 'Zmazať', action: row => remove(row)},
+            ],
         },
     ];
 

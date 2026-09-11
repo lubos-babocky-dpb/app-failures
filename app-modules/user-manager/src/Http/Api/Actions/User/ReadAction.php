@@ -20,7 +20,7 @@ class ReadAction
             ])
             ->get()
             ->map(fn (User $user) => [
-                'id' => $user->id,
+                'uuid' => $user->uuid,
                 'name' => $user->name,
                 'email' => $user->email,
                 'personal_id' => $user->personal_id,
@@ -32,8 +32,6 @@ class ReadAction
                     ->all(),
             ]);
 
-        return new JsonResponse([
-            'users' => $users,
-        ]);
+        return new JsonResponse($users);
     }
 }

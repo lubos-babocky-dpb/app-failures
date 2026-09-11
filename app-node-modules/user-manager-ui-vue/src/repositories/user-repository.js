@@ -1,23 +1,18 @@
 import { liveQuery } from 'dexie';
-import { db } from '../db';
+import { userManagerDb } from '../db';
 
 class UserRepository
 {
     live() {
-        return liveQuery(() => db.users.toArray());
+        return liveQuery(() => userManagerDb.users.toArray());
     }
 
     async all() {
-        return db.users.toArray();
+        return userManagerDb.users.toArray();
     }
 
-    async get(id) {
-        return db.users.get(id);
-    }
-
-    async replaceAll(users) {
-        await db.users.clear();
-        await db.users.bulkPut(users);
+    async get(uuid) {
+        return userManagerDb.users.get(uuid);
     }
 }
 

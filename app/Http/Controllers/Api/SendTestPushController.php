@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\WebPush;
 
@@ -12,16 +13,6 @@ class SendTestPushController
     public function __invoke(
         Request $request
     ): JsonResponse {
-
-        $ghostPushSubscription = $request->user()?->pushSubscriptions->last();
-
-        if(empty($ghostPushSubscription)) {
-            return response()->json([
-                'error' => 'No push subscription registered',
-            ], 404);
-        }
-
-
         $webPush = new WebPush([
             'VAPID' => [
                 'subject' => config('services.webpush.subject'),
@@ -30,33 +21,56 @@ class SendTestPushController
             ],
         ]);
 
-        $subscription = Subscription::create([
-            'endpoint' => $ghostPushSubscription->endpoint,
-            'keys' => [
-                'p256dh' => $ghostPushSubscription->p256dh,
-                'auth' => $ghostPushSubscription->auth,
-            ],
+        $payload = json_encode([
+            'type' => $request->input(
+                'type',
+                'sync-user-manager-data'
+            ),
         ]);
 
-        $webPush->queueNotification(
-            $subscription,
-            json_encode([
-                'type' => $request->input(
-                    'type',
-                    'sync-reportable-assets'
-                ),
-            ])
-        );
+        $pushSubscriptions = DB::table('dpb_sanctuary_model_ghostpushsubscription')
+            ->get();
+
+        if ($pushSubscriptions->isEmpty()) {
+            return response()->json([
+                'error' => 'No push subscriptions registered',
+            ], 404);
+        }
+
+        foreach ($pushSubscriptions as $pushSubscription) {
+            $webPush->queueNotification(
+                Subscription::create([
+                    'endpoint' => $pushSubscription->endpoint,
+                    'keys' => [
+                        'p256dh' => $pushSubscription->p256dh,
+                        'auth' => $pushSubscription->auth,
+                    ],
+                ]),
+                $payload
+            );
+        }
+
+        $reports = [];
 
         foreach ($webPush->flush() as $report) {
-            return response()->json([
+            $response = $report->getResponse();
+
+            $reports[] = [
                 'success' => $report->isSuccess(),
+                'endpoint' => $report->getEndpoint(),
+                'status' => $response?->getStatusCode(),
                 'reason' => $report->getReason(),
-            ]);
+                'expired' => $report->isSubscriptionExpired(),
+                'response' => $report->getResponseContent(),
+            ];
         }
 
         return response()->json([
-            'error' => 'Push was not sent',
-        ], 500);
+            'payload' => $payload,
+            'subscriptions' => $pushSubscriptions->count(),
+            'sent' => collect($reports)->where('success', true)->count(),
+            'failed' => collect($reports)->where('success', false)->count(),
+            'reports' => $reports,
+        ]);
     }
 }

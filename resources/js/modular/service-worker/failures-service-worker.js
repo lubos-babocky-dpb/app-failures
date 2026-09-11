@@ -1,14 +1,18 @@
+
+import { UserManager } from "@dpb/user-manager-ui-vue";
 import { FailuresSynchronizer } from "./failures-synchronizer";
 import { PushNotifications } from "./services/push-notifications";
 
 export class FailuresServiceWorker
 {
+    #userManager;
     #failuresSynchronizer;
     #pushNotifications;
 
     async initialize() {
         const { Gatekeeper } = await import('@dpb/gatekeeper');
         this.#failuresSynchronizer = new FailuresSynchronizer(Gatekeeper.token);
+        this.#userManager = new UserManager(Gatekeeper.token);
 
         this.#pushNotifications = new PushNotifications();
         this.#registerListeners();
@@ -24,6 +28,7 @@ export class FailuresServiceWorker
                 'sync-failure-types': () => this.#syncFailureTypes(),
                 'sync-failure-categories': () => this.#syncFailureCategories(),
                 'sync-failure-reports': () => this.#syncFailureReports(),
+                'sync-user-manager-data': () => this.#userManager.userSyncService.syncAllFromApi(),
             };
             const handler = syncHandlers[event.data?.type];
             if (handler) {
@@ -33,7 +38,6 @@ export class FailuresServiceWorker
     }
 
     async #syncInitialData() {
-        console.log('sync initial data');
         await Promise.all([
             this.#syncReportableAssets(),
             this.#syncFailureTypes(),
@@ -48,6 +52,7 @@ export class FailuresServiceWorker
         this.#pushNotifications.register('sync-failure-types', () => this.#syncFailureTypes());
         this.#pushNotifications.register('sync-failure-categories', () => this.#syncFailureCategories());
         this.#pushNotifications.register('sync-failure-reports', () => this.#syncFailureReports());
+        this.#pushNotifications.register('sync-user-manager-data', () => this.#userManager.userSyncService.syncAllFromApi());
     }
 
     async #syncReportableAssets() {
