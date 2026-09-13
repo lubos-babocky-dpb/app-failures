@@ -10,8 +10,8 @@
         },
     });
 
-    const edit = (row) => console.log('Edit: ', row);
-    const remove = (row) => console.log('Remove: ', row);
+    const edit = (row) => { console.log('Edit: ', row); };
+    const remove = (row) => userRepository.delete(row.uuid);
 
     const columns = [
         {
@@ -19,7 +19,7 @@
             field: 'name',
             action: row => {
                 console.log('User clicked:', row);
-            },
+            }, 
         },
 
         {
