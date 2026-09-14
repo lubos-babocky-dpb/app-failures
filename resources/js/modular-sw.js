@@ -1,9 +1,15 @@
 import { precacheAndRoute } from 'workbox-precaching';
 
 import { FailuresServiceWorker } from './modular/service-worker/failures-service-worker';
+import { AppServiceWorker } from './app-service-worker';
+
 
 precacheAndRoute(self.__WB_MANIFEST);
 
+new AppServiceWorker();
+
+
+/*
 const serviceWorker = new FailuresServiceWorker();
 
 self.addEventListener('install', event => {
@@ -15,3 +21,4 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
     event.waitUntil(self.clients.claim());
 });
+/**/

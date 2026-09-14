@@ -6,17 +6,12 @@ export class UserManager
     #apiService;
     #userSyncService;
 
-    constructor(bearerToken) {
-        this.#apiService = new UserManagerApiService({ bearerToken: bearerToken });
+    constructor(apiClient) {
+        this.#apiService = new UserManagerApiService(apiClient);
         this.#userSyncService = new UserSyncService(this.#apiService);
     }
 
     get userSyncService() {
         return this.#userSyncService;
-    }
-
-    async syncAll() {
-        const users = await this.#apiService.getUsers();
-        console.log('Users: ', users);
     }
 }

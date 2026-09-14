@@ -6,8 +6,6 @@ import DashboardPage from './pages/DashboardPage.vue';
 import LoginPage from './pages/LoginPage.vue';
 import { ApiClient, PushSubscriptionService } from "@dpb/app-base";
 
-Gatekeeper.setBaseUrl('/');
-
 if ('serviceWorker' in navigator) {
     try {
         console.log(globalThis.location.origin);

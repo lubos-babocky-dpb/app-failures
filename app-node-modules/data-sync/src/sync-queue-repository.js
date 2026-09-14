@@ -35,6 +35,7 @@ export class SyncQueueRepository
     }
 
     async all() {
+        console.log('returning all records from queue');
         return dataSyncDb.syncQueue.toArray();
     }
 

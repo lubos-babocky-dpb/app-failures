@@ -2,6 +2,7 @@
 import { UserManager } from "@dpb/user-manager-ui-vue";
 import { FailuresSynchronizer } from "./failures-synchronizer";
 import { PushNotifications } from "./services/push-notifications";
+import { dataSync } from "@dpb/data-sync";
 
 export class FailuresServiceWorker
 {
@@ -10,7 +11,9 @@ export class FailuresServiceWorker
     #pushNotifications;
 
     async initialize() {
+        console.log('SW init');
         const { Gatekeeper } = await import('@dpb/gatekeeper');
+        console.log(dataSync);
         this.#failuresSynchronizer = new FailuresSynchronizer(Gatekeeper.token);
         this.#userManager = new UserManager(Gatekeeper.token);
 
@@ -29,6 +32,7 @@ export class FailuresServiceWorker
                 'sync-failure-categories': () => this.#syncFailureCategories(),
                 'sync-failure-reports': () => this.#syncFailureReports(),
                 'sync-user-manager-data': () => this.#userManager.userSyncService.syncAllFromApi(),
+                'data-sync-record-queued': () => console.log('init data-sync')
             };
             const handler = syncHandlers[event.data?.type];
             if (handler) {

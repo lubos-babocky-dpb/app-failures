@@ -11,7 +11,6 @@
     });
 
     const edit = (row) => { console.log('Edit: ', row); };
-    const remove = (row) => userRepository.delete(row.uuid);
 
     const columns = [
         {
@@ -40,8 +39,8 @@
         {
             label: 'Akcie',
             content: [
-                {type: 'button', label: 'Upraviť', action: row => edit(row)},
-                {type: 'button', label: 'Zmazať', action: row => remove(row)},
+                {type: 'button', label: 'Upraviť', action: row => edit(row.uuid) },
+                {type: 'button', label: 'Zmazať', action: (row) => userRepository.delete(row.uuid) },
             ],
         },
     ];

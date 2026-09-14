@@ -1,6 +1,9 @@
+import { SyncQueueRepository } from "./sync-queue-repository";
+
 class DataSync
 {
     #syncServices = new Map();
+    #syncQueueRepository = new SyncQueueRepository();
 
     registerSyncService(name, syncService) {
         this.#syncServices.set(name, syncService);
@@ -10,14 +13,31 @@ class DataSync
         return this.#syncServices.get(name);
     }
 
-    greetings(name) {
-        alert(`Hello ${name}!`);
+    async sync() {
+        const records = await this.#syncQueueRepository.all();
+
+        for (const record of records) {
+            const syncService = this.getSyncService(record.syncService);
+
+            if (!syncService) {
+                console.warn(
+                    `Sync service "${record.syncService}" is not registered`
+                );
+                continue;
+            }
+
+            await syncService[record.operation](
+                record.modelUuid,
+                record.delta ?? null
+            );
+        }
     }
 
-    notifyRecordQueued() {
-        navigator.serviceWorker.controller?.postMessage({
+    async notifyRecordQueued() {
+        const registration = await navigator.serviceWorker.ready;
+        registration.active?.postMessage({
             type: 'data-sync-record-queued'
-        })
+        });
     }
 }
 

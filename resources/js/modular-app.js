@@ -25,8 +25,6 @@ echo.channel("reportables")
         console.log("REPORTABLES CHANGED:", event);
     });
 
-Gatekeeper.setBaseUrl(globalThis.location.origin);
-
 if ('serviceWorker' in navigator) {
     try {
         await navigator.serviceWorker.register('/modular-sw.js', { type: 'module' });
