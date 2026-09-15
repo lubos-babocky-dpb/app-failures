@@ -61,7 +61,9 @@ class DatabaseSeeder extends Seeder
             'page-access.user-management',
             'page-access.failures',
             'page-access.failure-reports',
+            'model.user.create',
             'model.user.read',
+            'model.user.update',
             'model.user.delete',
         ] as $permissionName) {
             $permissions[$permissionName] = Permission::create([

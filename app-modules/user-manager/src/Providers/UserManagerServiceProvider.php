@@ -21,7 +21,6 @@ class UserManagerServiceProvider extends ServiceProvider
 
     protected function registerRoutes(): void
     {
-        // Enforcing the failures-api/v1 root prefix without strict global lockouts
         Route::prefix('api/user-manager/v1')
             ->middleware(['auth:sanctuary_api'])
             ->group(__DIR__ . '/../../routes/api.php');

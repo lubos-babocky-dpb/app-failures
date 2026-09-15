@@ -18,18 +18,18 @@ class DataSync
 
         for (const record of records) {
             const syncService = this.getSyncService(record.syncService);
-
             if (!syncService) {
-                console.warn(
-                    `Sync service "${record.syncService}" is not registered`
-                );
+                console.warn(`Sync service "${record.syncService}" is not registered`);
                 continue;
             }
 
-            await syncService[record.operation](
-                record.modelUuid,
-                record.delta ?? null
-            );
+            try {
+                await syncService[record.operation](record.modelUuid, record.delta ?? null);
+                await this.#syncQueueRepository.remove(record.uuid);
+            } catch (error) {
+                console.error(`Sync failed: ${record.syncService}.${record.operation}(${record.modelUuid})`, {record, error});
+                throw error;
+            }
         }
     }
 

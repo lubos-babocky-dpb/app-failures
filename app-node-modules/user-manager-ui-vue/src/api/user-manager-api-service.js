@@ -1,33 +1,55 @@
-import { ApiClient } from '@dpb/app-base';
 import { UserEndpoints } from "./endpoints";
 
-export class UserManagerApiService {
-
+export class UserManagerApiService
+{
     #apiClient;
 
     /**
+     * 
      * @param {ApiClient} apiClient 
      */
     constructor(apiClient) {
         this.#apiClient = apiClient;
     }
 
-    async getUsers() {
-        return this.#apiClient.request(
-            UserEndpoints.READ
-        );
+    /** @returns {Promise<Response>} */
+    getUsers() {
+        return this.#apiClient.request(UserEndpoints.READ());
     }
 
-    async deleteUser(userUuid) {
-        try {
-            console.log(`UserManagerApiService -> deleteUser(${userUuid})`, UserEndpoints.DELETE(userUuid));
-            const response = await this.#apiClient.request(
-                UserEndpoints.DELETE(userUuid)
-            );
-            console.log('Response: ', response);
-            return response;
-        } catch(error) {
-            console.error(error);
-        }
+    /**
+     * @param {string} uuid 
+     * @returns {Promise<Response>}
+     */
+    getUser(uuid) {
+        return this.#apiClient.request(UserEndpoints.READ(uuid));
+    }
+
+    /**
+     * 
+     * @param {object} user 
+     * @returns {Promise<Response>}
+     */
+    createUser(user) {
+        return this.#apiClient.request(UserEndpoints.CREATE, {user});
+    }
+
+    /**
+     * 
+     * @param {string} userUuid 
+     * @param {object} delta 
+     * @returns {Promise<Response>}
+     */
+    updateUser(userUuid, delta) {
+        return this.#apiClient.request(UserEndpoints.UPDATE(userUuid), {delta});
+    }
+
+    /**
+     * 
+     * @param {string} userUuid 
+     * @returns {Promise<Response>}
+     */
+    deleteUser(userUuid) {
+        return this.#apiClient.request(UserEndpoints.DELETE(userUuid));
     }
 }

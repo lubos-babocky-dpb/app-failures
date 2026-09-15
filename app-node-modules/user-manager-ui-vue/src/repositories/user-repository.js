@@ -24,6 +24,15 @@ class UserRepository extends SyncableRepository
         return userManagerDb.users.get(uuid);
     }
 
+    convertModelToDatabaseRecord(model) {
+        return {
+            uuid: model.uuid,
+            name: model.name,
+            email: model.email,
+            personal_id: model.personalId,
+            permissions: model.permissions,
+        };
+    }
 }
 
 export const userRepository = new UserRepository();

@@ -1,7 +1,8 @@
 <script setup>
-    import { DataTable, Modal } from '@dpb/app-base-vue';
+    import { Button, DataTable, Modal } from '@dpb/app-base-vue';
     import { ref } from 'vue';
     import { userRepository } from '../repositories/user-repository';
+    import UserForm from '../components/forms/UserForm.vue';
 
     defineOptions({
         router: {
@@ -9,8 +10,6 @@
             requiredAnyPermission: ['page-access.user-manager']
         },
     });
-
-    const edit = (row) => { console.log('Edit: ', row); };
 
     const columns = [
         {
@@ -39,19 +38,28 @@
         {
             label: 'Akcie',
             content: [
-                {type: 'button', label: 'Upraviť', action: row => edit(row.uuid) },
+                {type: 'button', label: 'Upraviť', action: row => openEditUserModal(row) },
                 {type: 'button', label: 'Zmazať', action: (row) => userRepository.delete(row.uuid) },
             ],
         },
     ];
 
-    const modal = ref(null);
+    const detailModal = ref(null);
+    const createUserModal = ref(null);
+    const editUserModal = ref(null);
     const selectedUser = ref(null);
 
-    function handleRowClick(row) {
-        console.log('Clicked row:', row);
-        selectedUser.value = row;
-        modal.value.open();
+    const openCreateUserModal = () => {
+        createUserModal.value.open();
+    }
+
+    const openEditUserModal = (user) => {
+        selectedUser.value = user;
+        editUserModal.value.open();
+    }
+
+    function openUserDetailModal(row) {
+        detailModal.value.open();
     }
 
 </script>
@@ -59,20 +67,40 @@
 <template>
     <div>
         User management
+        <Button
+            :variant="'primary'"
+            @click="openCreateUserModal"
+        >
+            Pridať užívateľa
+        </Button>
     </div>
     <div>
         <DataTable
             :query="userRepository.live()"
             :columns="columns"
-            @row-click="handleRowClick"
+            @row-click="openUserDetailModal"
         />
     </div>
     <Modal
-        ref="modal"
-        title="Vozidlo"
+        ref="detailModal"
+        title="User"
     >
         <div v-if="selectedUser">
             {{ selectedUser.code }}
         </div>
+    </Modal>
+    <Modal
+        ref="createUserModal"
+        title="Pridať užívateľa"
+    >
+        <UserForm
+            @submitted="() => createUserModal.close()"
+        />
+    </Modal>
+    <Modal
+        ref="editUserModal"
+        title="Upraviť zamestnanca"
+    >
+        <UserForm :user="selectedUser" />
     </Modal>
 </template>
