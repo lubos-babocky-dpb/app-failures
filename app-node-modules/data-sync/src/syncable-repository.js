@@ -30,14 +30,16 @@ export class SyncableRepository
     }
 
     async update(model) {
+        const original = await this.#table.get(model.uuid);
         const record = this.convertModelToDatabaseRecord(model);
+        const delta = this.#computeDelta(original, record);
         await this.#syncQueueRepository.add({
             syncService: this.#syncService,
             modelUuid: model.uuid,
             operation: 'update',
-            delta: record
+            delta: delta
         });
-        await this.#table.add(record);
+        await this.#table.put(record);
         dataSync.notifyRecordQueued();
     }
 
@@ -54,5 +56,19 @@ export class SyncableRepository
     convertModelToDatabaseRecord(model)
     {
         throw new Error('Extend method convertModelToDatabaseRecord in your repository!');
+    }
+
+
+    #computeDelta(original, current) {
+        const delta = {};
+
+        for (const key of Object.keys(current)) {
+            // Deep comparison pre objekty a polia (ako permissions)
+            if (JSON.stringify(original[key]) !== JSON.stringify(current[key])) {
+                delta[key] = current[key];
+            }
+        }
+
+        return delta;
     }
 }

@@ -11,12 +11,12 @@ export class SyncQueueRepository
     }) {
         if(!syncService || !modelUuid || !operation) {
             console.error(arguments);
-            throw new Error('Invalid sync queue record');
+            throw new Error('Invalid sync queue record', syncService, modelUuid, operation);
         }
 
         if (!['create', 'update', 'delete'].includes(operation)) {
             console.error(arguments);
-            throw new Error('Invalid sync operation');
+            throw new Error('Invalid sync operation', operation);
         }
 
         if(['create', 'update'].includes(operation) && !delta) {

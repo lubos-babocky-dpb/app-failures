@@ -1,15 +1,18 @@
-export class User {
+export class User
+{
     constructor({
         uuid = crypto.randomUUID(),
         name,
         email,
         personalId,
         permissions = [],
-    }) {
+    } = {}) {
         this.uuid = uuid;
         this.name = name;
         this.email = email;
         this.personalId = personalId;
-        this.permissions = permissions;
+        this.permissions = Array.isArray(permissions)
+            ? [...permissions]
+            : []
     }
 }

@@ -27,7 +27,7 @@
 
         {
             label: 'PID',
-            field: 'personal_id',
+            field: 'personalId',
         },
     
         {

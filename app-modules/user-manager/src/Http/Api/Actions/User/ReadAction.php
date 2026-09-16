@@ -5,13 +5,11 @@ namespace Dpb\UserManager\Http\Api\Actions\User;
 
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Request;
 
 class ReadAction
 {
-    public function __invoke(
-        Request $request
-    ): JsonResponse {
+    public function __invoke(): JsonResponse
+    {
         $users = User::query()
             ->with([
                 'permissions:id,name',

@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Dpb\UserManager\Http\Api\Actions\User;
 
 use App\Models\User;
+use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\ResponseFactory;
-use Illuminate\Support\Facades\Hash;
 
 class CreateAction
 {
     public function __construct(
-        private readonly ResponseFactory $responseFactory
+        private readonly ResponseFactory $responseFactory,
+        private readonly Hasher $hasher
     ) {}
 
     public function __invoke(
@@ -31,7 +32,7 @@ class CreateAction
             'name' => $userData['name'],
             'email' => $userData['email'],
             'personal_id' => $userData['personal_id'],
-            'password' => Hash::make('0000'),
+            'password' => $this->hasher->make('0000'),
         ]);
 
         return $this->responseFactory

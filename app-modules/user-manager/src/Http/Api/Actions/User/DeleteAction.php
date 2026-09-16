@@ -7,17 +7,21 @@ use App\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Routing\ResponseFactory;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
+
+use Illuminate\Contracts\Auth\Factory as AuthFactory;
+use Illuminate\Http\JsonResponse;
 
 class DeleteAction
 {
     public function __construct(
-        private readonly ResponseFactory $responseFactory
+        private readonly ResponseFactory $responseFactory,
+        private readonly AuthFactory $authFactory
     ) {}
 
     public function __invoke(
         string $userUuid
-    ): Response {
+    ): JsonResponse {
+        return $this->responseFactory->json(['x' => $this->authFactory->guard('sanctuary_api')->user()->activeSession->authenticatable->uuid]);
         $currentUser = Auth::guard('sanctuary_api')
             ->user()
             ->activeSession

@@ -36,8 +36,17 @@ export class UserSyncService
         return true;
     }
 
-    async update(modelUuid, delta) {
-        console.log(`Update user ${modelUuid}`);
+    async update(modelUuid, delta)
+    {
+        try {
+            const response = await this.#apiService.updateUser(modelUuid, delta);
+    
+            console.log(`Update user ${modelUuid}`, delta);
+            console.log('response: ', response);
+            console.log('response json: ', await response.json());
+        } catch (ex) {
+            console.log(ex);
+        }
     }
 
     /**

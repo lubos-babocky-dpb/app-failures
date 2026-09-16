@@ -5,20 +5,19 @@
     import { User } from '../../model/user';
 
     const props = defineProps({
-        user: { type: Object, default: null }
+        user: {
+            type: Object,
+            default: null
+        }
     });
 
     const emit = defineEmits(['submitted']);
 
-    const form = reactive({
-        name: props.user?.name ?? '',
-        email: props.user?.email ?? '',
-        personalId: props.user?.personal_id ?? '',
-    });
+    const form = reactive(props.user ? { ...props.user } : {});
 
     const submit = () => {
         if (props.user) {
-            userRepository.update(form);
+            userRepository.update(new User(form));
         } else {
             userRepository.create(new User(form));
         }
