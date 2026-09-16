@@ -3,32 +3,29 @@ declare(strict_types=1);
 
 namespace Dpb\UserManager\Http\Api\Actions\User;
 
+use App\Models\User;
+use Dpb\UserManager\Contracts\UserRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\ResponseFactory;
-use Illuminate\Support\Facades\Auth;
-
 
 class UpdateAction
 {
     public function __construct(
-        private readonly ResponseFactory $responseFactory
+        private readonly ResponseFactory $responseFactory,
+        private readonly UserRepositoryInterface $userRepository
     ) {}
 
-public function __invoke(
-    Request $request,
-    string $uuid
-): JsonResponse {
-    return $this->responseFactory->json([
-        'test' => 'OK',
-        'uuid' => $uuid,
-        'delta' => $request->all()
-    ]);
+    public function __invoke(
+        Request $request,
+        string $uuid
+    ): JsonResponse {
+        $user = $this->userRepository->findByUuid($uuid);
+        $user->fill($request->input('delta', []));
+        $user->save();
 
-    $currentUser = Auth::guard('sanctuary_api')
-        ->user()
-        ->activeSession
-        ->authenticatable;
-    return $this->responseFactory->json($currentUser->toArray());
+        return $this->responseFactory->json(
+            $user->fresh()->toArray()
+        );
     }
 }

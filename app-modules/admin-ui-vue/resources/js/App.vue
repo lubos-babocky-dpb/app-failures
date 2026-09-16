@@ -3,6 +3,7 @@
     import { PageRouter } from '@dpb/page-router-vue';
     import { Gatekeeper, IdentityUpdatedEvent } from '@dpb/gatekeeper';
     import LogoutButton from './components/actions/LogoutButton.vue';
+    import { flashMessageRepository, FlashMessages } from '@dpb/flash-messages-vue';
 
     const menuItems = ref(PageRouter.menuItems);
 
@@ -12,6 +13,8 @@
         currentUser.value = Gatekeeper.identity?.user ?? null;
         menuItems.value = PageRouter.menuItems;
     }
+
+    window.flashMessageRepository = flashMessageRepository;
 
     onMounted(() => Gatekeeper.addEventListener(IdentityUpdatedEvent.TYPE, handleIdentityUpdated));
     onUnmounted(() => Gatekeeper.removeEventListener(IdentityUpdatedEvent.TYPE, handleIdentityUpdated));
@@ -49,7 +52,10 @@
                         {{ item.label }}
                     </RouterLink>
                 </nav>
-                <LogoutButton v-if="currentUser" />
+                <div class="flex">
+                    <FlashMessages class="mr-3" />
+                    <LogoutButton v-if="currentUser" />
+                </div>
             </div>
         </header>
 

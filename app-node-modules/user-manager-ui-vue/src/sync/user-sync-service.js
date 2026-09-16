@@ -1,5 +1,7 @@
+import { flashMessages } from '@dpb/flash-messages-vue/sw';
 import { UserManagerApiService } from '../api/user-manager-api-service';
 import { userManagerDb } from '../db';
+
 export class UserSyncService
 {
     /** @type {UserManagerApiService} */
@@ -55,7 +57,21 @@ export class UserSyncService
      * @returns {boolean}
      */
     async delete(uuid) {
-        const response = await this.#apiService.deleteUser(uuid);
-        return response.status === 200;
+        try {
+            const response = await this.#apiService.deleteUser(uuid);
+            if(response.status !== 204) {
+                const responseJson = await response.json();
+                await userManagerDb.users.put(responseJson.user);
+                await flashMessages.create({
+                    title: 'Error',
+                    body: responseJson.message,
+                    severity: 'error'
+                })
+            }
+            return true;
+        } catch (error) {
+            console.error('UserSyncService.delete(): ', error);
+            return false;
+        }
     }
 }

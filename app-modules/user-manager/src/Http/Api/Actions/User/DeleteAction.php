@@ -3,38 +3,42 @@ declare(strict_types=1);
 
 namespace Dpb\UserManager\Http\Api\Actions\User;
 
-use App\Models\User;
-use Illuminate\Http\Response;
+use Dpb\UserManager\Contracts\UserRepositoryInterface;
 use Illuminate\Routing\ResponseFactory;
-use Illuminate\Support\Facades\Auth;
-
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
-use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class DeleteAction
 {
     public function __construct(
         private readonly ResponseFactory $responseFactory,
-        private readonly AuthFactory $authFactory
+        private readonly AuthFactory $authFactory,
+        private readonly UserRepositoryInterface $userRepository
     ) {}
 
     public function __invoke(
         string $userUuid
-    ): JsonResponse {
-        return $this->responseFactory->json(['x' => $this->authFactory->guard('sanctuary_api')->user()->activeSession->authenticatable->uuid]);
-        $currentUser = Auth::guard('sanctuary_api')
+    ): Response {
+
+        $currentUser = $this->authFactory
+            ->guard('sanctuary_api')
             ->user()
-            ->activeSession
-            ->authenticatable;
+            ?->activeSession
+            ?->authenticatable ?? null;
+        
+        $user = $this->userRepository->findByUuid($userUuid);
 
-        if ($currentUser->uuid === $userUuid) {
-            abort(403, 'You cannot delete yourself.');
+        if (($currentUser?->uuid ?? '') === $userUuid) {
+            return $this->responseFactory->json(
+                data: [
+                    'message' => 'You cannot delete yourself.',
+                    'user' => $user->toArray()
+                ],
+                status: 403
+            );
+        } else {
+            $user->delete();
+            return $this->responseFactory->noContent();
         }
-
-        User::where(column: 'uuid', operator: '=', value: $userUuid, boolean: 'and')
-            ->firstOrFail()
-            ->delete();
-
-        return $this->responseFactory->noContent();
     }
 }

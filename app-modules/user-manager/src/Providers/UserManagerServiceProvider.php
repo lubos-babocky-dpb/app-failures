@@ -3,14 +3,16 @@ declare(strict_types=1);
 namespace Dpb\UserManager\Providers;
 
 use App\Models\User;
+use Dpb\UserManager\Contracts\UserRepositoryInterface;
 use Dpb\UserManager\Observers\UserObserver;
+use Dpb\UserManager\Repositories\UserRepository;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class UserManagerServiceProvider extends ServiceProvider
 {
     public function register() {
-
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
     }
 
     public function boot() {
