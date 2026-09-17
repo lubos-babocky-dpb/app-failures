@@ -5,7 +5,7 @@
     "type": "module",
     "exports": {
         ".": "./src/index.js",
-        "./sw": "./src/index-sw.js"
+        "./vue": "./src/index-vue.js"
     },
     "peerDependencies": {
         "vue": "^3.5.34"

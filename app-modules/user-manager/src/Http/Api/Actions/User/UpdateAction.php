@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Dpb\UserManager\Http\Api\Actions\User;
 
-use App\Models\User;
 use Dpb\UserManager\Contracts\UserRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,8 +23,6 @@ class UpdateAction
         $user->fill($request->input('delta', []));
         $user->save();
 
-        return $this->responseFactory->json(
-            $user->fresh()->toArray()
-        );
+        return $this->responseFactory->json(['userResource' => $user->fresh()->toArray()]);
     }
 }

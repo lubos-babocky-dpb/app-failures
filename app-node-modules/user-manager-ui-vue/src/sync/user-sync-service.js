@@ -1,4 +1,4 @@
-import { flashMessages } from '@dpb/flash-messages-vue/sw';
+import { flashMessages } from '@dpb/flash-messages-vue';
 import { UserManagerApiService } from '../api/user-manager-api-service';
 import { userManagerDb } from '../db';
 
@@ -38,14 +38,15 @@ export class UserSyncService
         return true;
     }
 
-    async update(modelUuid, delta)
+    async update(userUuid, delta)
     {
         try {
-            const response = await this.#apiService.updateUser(modelUuid, delta);
-    
-            console.log(`Update user ${modelUuid}`, delta);
-            console.log('response: ', response);
-            console.log('response json: ', await response.json());
+            const response = await this.#apiService.updateUser(userUuid, delta);
+            if(response.status === 200) {
+                const jsonResponse = await response.json();
+                await userManagerDb.users.put(jsonResponse.userResource);
+                return true;
+            }
         } catch (ex) {
             console.log(ex);
         }

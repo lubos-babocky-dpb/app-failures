@@ -1,3 +1,18 @@
-export { flashMessageRepository } from './repositories/flash-message-repository.js';
-export { FlashMessage } from './models/flash-message.js';
-export { default as FlashMessages } from './components/FlashMessages.vue';
+import { flashMessageRepository } from "./repositories/flash-message-repository";
+
+class FlashMessages
+{
+    async create({
+        title,
+        body,
+        severity
+    }) {
+        return flashMessageRepository.create({
+            title: title,
+            body: body,
+            severity: severity
+        });
+    }
+}
+
+export const flashMessages = new FlashMessages();
