@@ -4,6 +4,7 @@ namespace Dpb\UserManager\Providers;
 
 use App\Models\User;
 use Dpb\UserManager\Contracts\UserRepositoryInterface;
+use Dpb\UserManager\Http\Api\User\UserController;
 use Dpb\UserManager\Observers\UserObserver;
 use Dpb\UserManager\Repositories\UserRepository;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,8 @@ class UserManagerServiceProvider extends ServiceProvider
         Route::prefix('api/user-manager/v1')
             ->middleware(['auth:sanctuary_api'])
             ->group(__DIR__ . '/../../routes/api.php');
+        Route::prefix('test-api')
+            ->get('users', [UserController::class, 'readAction']);
     }
 
     private function registerObservers(): void{

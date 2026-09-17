@@ -5,9 +5,17 @@ namespace Dpb\UserManager\Repositories;
 
 use App\Models\User;
 use Dpb\UserManager\Contracts\UserRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 
 class UserRepository implements UserRepositoryInterface
 {
+    public function findAll(): Collection
+    {
+        return User::query()
+            ->with(['permissions:uuid', 'roles:uuid', 'roles.permissions:uuid'])
+            ->get();
+    }
+
     public function findByUuid(
         string $uuid
     ): User {
