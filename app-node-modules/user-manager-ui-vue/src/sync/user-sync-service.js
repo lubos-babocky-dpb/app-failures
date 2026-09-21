@@ -16,7 +16,7 @@ export class UserSyncService
             const response = await this.#apiService.getUsers();
             const users = await response.json();
             await userManagerDb.users.clear();
-            await userManagerDb.users.bulkPut(users);
+            await userManagerDb.users.bulkPut(users.data);
         } catch(ex) {
             console.error('syncAllFromApi', ex);
         }
@@ -44,7 +44,7 @@ export class UserSyncService
             const response = await this.#apiService.updateUser(userUuid, delta);
             if(response.status === 200) {
                 const jsonResponse = await response.json();
-                await userManagerDb.users.put(jsonResponse.userResource);
+                await userManagerDb.users.put(jsonResponse.data);
                 return true;
             }
         } catch (ex) {
