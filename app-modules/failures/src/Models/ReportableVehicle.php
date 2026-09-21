@@ -8,16 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Table('dpb_failures_model_reportablevehicle')]
-#[Fillable([
-    'id',
-    'uuid',
-    'code',
-    'type_id',
-    'type_name',
-    'model_id',
-    'model_name',
-    'is_active'
-])]
+#[Fillable(['id', 'uuid', 'code', 'type_id', 'type_name', 'model_id', 'model_name', 'is_active'])]
 class ReportableVehicle extends Model
 {
     /**

@@ -1,4 +1,3 @@
-import { ApiClient } from '@dpb/app-base';
 import * as Endpoints from "./endpoints";
 
 export class FailuresApiService
@@ -8,14 +7,9 @@ export class FailuresApiService
     /**
      * @param {ApiClient} apiClient 
      */
-    constructor({
-        baseUrl = globalThis.location.origin,
-        bearerToken = null,
-        apiClient = new ApiClient({
-            baseUrl: baseUrl,
-            bearerToken: bearerToken
-        })
-    } = {}) {
+    constructor(
+        apiClient
+    ) {
         this.#apiClient = apiClient;
     }
 

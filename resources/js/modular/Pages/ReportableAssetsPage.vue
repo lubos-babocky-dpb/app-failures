@@ -1,7 +1,10 @@
 <script setup>
     import { ref, computed, onMounted, onUnmounted } from 'vue';
     import QRCode from 'qrcode';
-    import { failuresUiVue } from '@dpb/failures-ui-vue';
+    import { FailuresUiVue } from '@dpb/failures-ui-vue';
+    import { Gatekeeper } from '@dpb/gatekeeper';
+
+    const failuresUiVue = new FailuresUiVue(Gatekeeper.apiClient);
 
     const reportableAssets = ref([]);
     const search = ref('');

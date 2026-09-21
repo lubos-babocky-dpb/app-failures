@@ -4,7 +4,6 @@ namespace Dpb\UserManager\Providers;
 
 use App\Models\User;
 use Dpb\UserManager\Contracts\UserRepositoryInterface;
-use Dpb\UserManager\Http\Api\User\UserController;
 use Dpb\UserManager\Observers\UserObserver;
 use Dpb\UserManager\Repositories\UserRepository;
 use Illuminate\Support\Facades\Route;

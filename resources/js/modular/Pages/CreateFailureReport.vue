@@ -4,11 +4,12 @@
     import NoteBox from '../components/forms/create-report/NoteBox.vue';
     import PhotoBox from '../components/forms/create-report/PhotoBox.vue';
     import ReportableAssetSelector from '../components/forms/create-report/ReportableAssetSelector.vue';
-    import { FailureReport, failuresUiVue } from "@dpb/failures-ui-vue";
+    import { FailureReport, FailuresUiVue } from "@dpb/failures-ui-vue";
     import { Button, Modal } from "@dpb/app-base-vue";
     import router from '../router.js';
     import { Gatekeeper } from "@dpb/gatekeeper";
 
+    const failuresUiVue = new FailuresUiVue(Gatekeeper.apiClient);
     const debug = true;
     const failureReport = ref(FailureReport.prepareNewFailureReport());
     const failureReportCreatedModal = ref(null);

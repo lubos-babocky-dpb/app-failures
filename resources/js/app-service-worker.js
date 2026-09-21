@@ -1,5 +1,6 @@
 import { UserManager } from '@dpb/user-manager-ui-vue';
 import { dataSync } from '@dpb/data-sync';
+import { FailuresUiVue } from '@dpb/failures-ui-vue';
 
 export class AppServiceWorker
 {
@@ -8,6 +9,7 @@ export class AppServiceWorker
     #messageEvents;
     #gatekeeper;
     #userManager;
+    #failuresModule;
 
     constructor()
     {
@@ -26,7 +28,10 @@ export class AppServiceWorker
     {
         this.registerMessageHandler('sync-user-manager-data', () => this.#userManager.userSyncService.syncAllFromApi());
         this.registerMessageHandler('data-sync-record-queued', () => dataSync.sync());
-        this.registerMessageHandler('sync-initial-data', () => console.warn('sync-initial-data'));
+        this.registerMessageHandler('sync-initial-data', () => {
+            console.info('sync-initial-data');
+            this.#failuresModule.syncService.syncAllFromApi();
+        });
     }
 
     #registerPushNotificationEvents()
@@ -45,6 +50,7 @@ export class AppServiceWorker
     async #doInitialization() {
         this.#gatekeeper = (await import('@dpb/gatekeeper')).Gatekeeper;
         this.#userManager = new UserManager(this.#gatekeeper.apiClient);
+        this.#failuresModule = new FailuresUiVue(this.#gatekeeper.apiClient);
         dataSync.registerSyncService('users', this.#userManager.userSyncService);
     }
 

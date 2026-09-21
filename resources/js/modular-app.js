@@ -5,9 +5,7 @@ import router from "./modular/router.js";
 import { i18n } from "./modular/i18n.js";
 import Pusher from "pusher-js";
 import Echo from "laravel-echo";
-import { failuresUiVue } from "@dpb/failures-ui-vue";
 import { ApiClient, PushSubscriptionService } from "@dpb/app-base";
-
 
 window.Pusher = Pusher;
 const echo = new Echo({
@@ -25,26 +23,45 @@ echo.channel("reportables")
         console.log("REPORTABLES CHANGED:", event);
     });
 
-if ('serviceWorker' in navigator) {
+// 1. Mount Vue application immediately
+const app = createApp(App);
+app.use(router);
+app.use(i18n);
+app.mount('#app');
+
+// 2. Asynchronous background registration (non-blocking)
+async function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) {
+        return;
+    }
+
     try {
-        await navigator.serviceWorker.register('/modular-sw.js', { type: 'module' });
-        const registration = await navigator.serviceWorker.ready;
-        registration.active.postMessage({type: 'sync-initial-data'});
-        const apiClient = new ApiClient({baseUrl: globalThis.location.origin, bearerToken: Gatekeeper.token});
+        // Removed { type: 'module' } to support standard bundled SW scripts
+        const registration = await navigator.serviceWorker.register('/modular-sw.js');
+        const activeRegistration = await navigator.serviceWorker.ready;
+
+        activeRegistration.active?.postMessage({ type: 'sync-initial-data' });
+
+        if (!Gatekeeper.token) {
+            console.warn('Push initialization skipped: Missing bearer token');
+            return;
+        }
+
+        const apiClient = new ApiClient({
+            baseUrl: globalThis.location.origin,
+            bearerToken: Gatekeeper.token
+        });
+
         const pushSubscriptionService = new PushSubscriptionService({
             vapidPublicKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
             apiClient: apiClient
         });
+
         const subscription = await pushSubscriptionService.getOrCreateSubscription();
-        console.log('Push subscription:', subscription);
+        console.log('Push subscription initialized:', subscription);
     } catch (error) {
-        console.error('Push initialization failed', error);
+        console.error('Push/ServiceWorker initialization failed:', error);
     }
 }
 
-await failuresUiVue.initialize({ bearerToken: Gatekeeper.token });
-
-createApp(App)
-    .use(router)
-    .use(i18n)
-    .mount('#app');
+registerServiceWorker();

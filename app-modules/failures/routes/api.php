@@ -2,13 +2,14 @@
 
 use Dpb\Failures\Http\Api\Actions\Failures\Categories\CreateCategoryAction;
 use Dpb\Failures\Http\Api\Actions\Failures\Categories\DeleteCategoryAction;
-use Dpb\Failures\Http\Api\Actions\Failures\Categories\ListCategoriesAction;
 use Dpb\Failures\Http\Api\Actions\Failures\Types\CreateFailureTypeAction;
 use Dpb\Failures\Http\Api\Actions\Failures\Types\DeleteFailureTypeAction;
-use Dpb\Failures\Http\Api\Actions\Failures\Types\ListFailureTypesAction;
 use Dpb\Failures\Http\Api\Actions\Report\CreateFailureReportAction;
 use Dpb\Failures\Http\Api\Actions\Report\ListFailureReportsAction;
-use Dpb\Failures\Http\Api\Actions\ReportableAssets\ListReportableAssetsAction;
+use Dpb\Failures\Http\Api\FailureCategory\FailureCategoryController;
+use Dpb\Failures\Http\Api\FailureReport\FailureReportController;
+use Dpb\Failures\Http\Api\FailureType\FailureTypeController;
+use Dpb\Failures\Http\Api\ReportableAsset\ReportableAssetController;
 use Dpb\Sanctuary\Middleware\RoleMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -23,10 +24,12 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')
     ->middleware('auth:sanctuary_api')
     ->group(function (): void {
-        Route::get('/reportable-asset', ListReportableAssetsAction::class);
-        Route::get('/failure-category', ListCategoriesAction::class);        
-        Route::get('/failure-type', ListFailureTypesAction::class);
-        Route::get('/failure-report', ListFailureReportsAction::class);
+        Route::get('/reportable-asset', [ReportableAssetController::class, 'readAction']);
+        Route::get('/failure-category', [FailureCategoryController::class, 'readAction']);
+        Route::get('/failure-type', [FailureTypeController::class, 'readAction']);
+        Route::get('/failure-report', [FailureReportController::class, 'readAction']);
+
+        //[LB:] Old routes:
         Route::post('/failure-report', CreateFailureReportAction::class);
         //[LB:] Protected routes:
         Route::middleware(RoleMiddleware::using('admin'))

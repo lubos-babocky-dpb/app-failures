@@ -4,8 +4,10 @@
     import { ReportableAssetQrScanner } from '../../../scanner/reportable-asset-qr-scanner';
     import { useI18n } from 'vue-i18n';
     import ReportableAssetInfoBox from './ReportableAssetInfoBox.vue';
-    import { failuresUiVue } from '@dpb/failures-ui-vue';
+    import { FailuresUiVue } from '@dpb/failures-ui-vue';
+    import { Gatekeeper } from '@dpb/gatekeeper';
 
+    const failuresUiVue = new FailuresUiVue(Gatekeeper.apiClient);
     const failureReport = defineModel();
     const { t } = useI18n();
     const qrScannerModal = ref(null);

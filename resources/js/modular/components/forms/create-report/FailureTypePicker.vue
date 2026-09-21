@@ -1,6 +1,9 @@
 <script setup>
-    import { failuresUiVue } from '@dpb/failures-ui-vue';
+    import { FailuresUiVue } from '@dpb/failures-ui-vue';
+    import { Gatekeeper } from '@dpb/gatekeeper';
     import { ref, watch } from 'vue';
+
+    const failuresUiVue = new FailuresUiVue(Gatekeeper.apiClient);
 
     const emit = defineEmits(['close']);
     const failureReport = defineModel();

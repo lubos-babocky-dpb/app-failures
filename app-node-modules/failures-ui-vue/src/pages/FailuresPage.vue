@@ -1,9 +1,11 @@
 <script setup>
     import { onMounted, ref } from 'vue';
-    import { failuresUiVue } from '../index';
+    
     import FailureBrowser from '../components/FailureBrowser.vue';
-    import { fetchCategories, fetchFailureTypes } from '../services/failures.js';
     import { buildFailureTree } from '../utils/build-failure-free.js';
+    import { FailuresUiVue } from '../index.js';
+    import { Gatekeeper } from '@dpb/gatekeeper';
+    const failuresUiVue = new FailuresUiVue(Gatekeeper.apiClient);
 
     defineOptions({
         router: {

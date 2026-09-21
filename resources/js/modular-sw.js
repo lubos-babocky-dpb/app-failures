@@ -1,6 +1,4 @@
 import { precacheAndRoute } from 'workbox-precaching';
-
-import { FailuresServiceWorker } from './modular/service-worker/failures-service-worker';
 import { AppServiceWorker } from './app-service-worker';
 
 

@@ -1,22 +1,23 @@
-import { db } from "./db";
-
 import { failureCategoriesRepository } from "./repositories/failure-categories-repository";
 import { failureReportsRepository } from "./repositories/failure-reports-repository";
 import { failureTypesRepository } from "./repositories/failure-types-repository";
 import { reportableAssetsRepository } from "./repositories/reportable-assets-repository";
 import { FailuresApiService } from "./api/failures-api-service";
+import { FailuresSyncService } from "./sync/failures-sync-service";
 
-class FailuresUiVue
+export class FailuresUiVue
 {
-    #api = null;
+    #apiService = null;
+    #syncService = null;
+
+    constructor(apiClient) {
+        this.#apiService = new FailuresApiService(apiClient);
+        this.#syncService = new FailuresSyncService(this.#apiService);
+    }
 
     async initialize({baseUrl = '/', bearerToken = null} = {})
     {
-        await db.open();
-        this.#api = new FailuresApiService({
-            baseUrl: baseUrl,
-            bearerToken: bearerToken
-        });
+        console.warn('FailuresUiVue.initialize still called!');
     }
 
     get failureCategoriesRepository() {
@@ -36,7 +37,11 @@ class FailuresUiVue
     }
 
     get api() {
-        return this.#api;
+        return this.#apiService;
+    }
+
+    get syncService() {
+        return this.#syncService;
     }
 
     async createFailureReport(failureReport) {
@@ -45,7 +50,6 @@ class FailuresUiVue
     }
 }
 
-export const failuresUiVue = new FailuresUiVue();
 export { FailureCategory } from './models/failure-category';
 export { FailureType } from './models/failure-type';
 export { FailureReport } from './models/failure-report';

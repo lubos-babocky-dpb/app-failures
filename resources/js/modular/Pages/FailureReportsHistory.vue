@@ -1,11 +1,13 @@
 <script setup>
-    import { FailureReport, failuresUiVue } from '@dpb/failures-ui-vue';
+    import { FailureReport, FailuresUiVue } from '@dpb/failures-ui-vue';
     import { onMounted, onUnmounted, ref } from 'vue';
     import ListItem from '../components/failure-history/ListItem.vue';
     import { Modal } from '@dpb/app-base-vue';
     import FailureReportDetail from '../components/failure-history/FailureReportDetail.vue';
     import { useRoute } from 'vue-router';
+    import { Gatekeeper } from '@dpb/gatekeeper';
 
+    const failuresUiVue = new FailuresUiVue(Gatekeeper.apiClient);
     const route = useRoute();
     const failureReports = ref([]);
     const detailModal = ref(null);

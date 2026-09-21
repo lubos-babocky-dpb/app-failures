@@ -5,12 +5,7 @@
   import NotificationContainer from './components/ui/NotificationContainer.vue';
   import SideNavigation from './components/ui/SideNavigation.vue';
 
-  import { FailuresApiService } from './api/failures-api-service.js';
-
   const personalAccessToken = ref(null);
-  const failuresApiService = new FailuresApiService({
-    bearerToken: Gatekeeper.token
-  });
 
   onMounted(async () => {
       try {
