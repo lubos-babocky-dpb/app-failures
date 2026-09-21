@@ -38,7 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 report($exception);
 
                 return response()->json([
-                    'message' => 'An unexpected error occurred.',
+                    'message' => $exception->getMessage(),
                 ], 500);
             }
         });
