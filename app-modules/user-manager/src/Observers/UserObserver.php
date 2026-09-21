@@ -23,12 +23,14 @@ class UserObserver
     public function updated(
         User $user
     ): void {
+        WebPushMessage::dispatch('sync-user-manager-data');
         $this->dispatcher->dispatch(new UsersChangedEvent());
     }
 
     public function deleted(
         User $user
     ): void {
+        WebPushMessage::dispatch('sync-user-manager-data');
         $this->dispatcher->dispatch(new UsersChangedEvent());
     }
 }

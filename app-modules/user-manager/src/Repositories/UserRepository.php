@@ -6,13 +6,14 @@ namespace Dpb\UserManager\Repositories;
 use App\Models\User;
 use Dpb\UserManager\Contracts\UserRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Override;
 
 class UserRepository implements UserRepositoryInterface
 {
     public function findAll(): Collection
     {
         return User::query()
-            ->with(['permissions:uuid', 'roles:uuid', 'roles.permissions:uuid'])
+            ->with(['permissions', 'roles', 'roles.permissions'])
             ->get();
     }
 
@@ -22,6 +23,19 @@ class UserRepository implements UserRepositoryInterface
         return User::query()
             ->where(column: 'uuid', operator: '=', value: $uuid)
             ->firstOrFail();
+    }
+
+    #[Override]
+    public function create(
+        array $userData
+    ): User {
+        return User::create($userData);
+    }
+
+    public function update(
+        User $user
+    ): void {
+        $user->save();
     }
 
     public function delete(

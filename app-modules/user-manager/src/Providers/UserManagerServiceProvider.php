@@ -27,8 +27,6 @@ class UserManagerServiceProvider extends ServiceProvider
         Route::prefix('api/user-manager/v1')
             ->middleware(['auth:sanctuary_api'])
             ->group(__DIR__ . '/../../routes/api.php');
-        Route::prefix('test-api')
-            ->get('users', [UserController::class, 'readAction']);
     }
 
     private function registerObservers(): void{
