@@ -4,10 +4,8 @@
     import { ReportableAssetQrScanner } from '../../../scanner/reportable-asset-qr-scanner';
     import { useI18n } from 'vue-i18n';
     import ReportableAssetInfoBox from './ReportableAssetInfoBox.vue';
-    import { FailuresUiVue } from '@dpb/failures-ui-vue';
-    import { Gatekeeper } from '@dpb/gatekeeper';
+    import { failuresModule } from '@dpb/failures-core';
 
-    const failuresUiVue = new FailuresUiVue(Gatekeeper.apiClient);
     const failureReport = defineModel();
     const { t } = useI18n();
     const qrScannerModal = ref(null);
@@ -20,13 +18,11 @@
             qrScanner = new ReportableAssetQrScanner('qr-reader');
             qrScanner.scan()
                 .then((qrCodeContent) => {
-                    const reportableAssetId = Number(extractReportableAssetId(qrCodeContent));
-                    failuresUiVue.reportableAssetsRepository
-                        .get(reportableAssetId)
-                        .then((reportableAssetData) => {
-                            failureReport.value.reportableAsset = reportableAssetData;
+                    failuresModule.findReportableAsset(extractReportableAssetId(qrCodeContent))
+                        .then(reportableAsset => {
+                            failureReport.value = failureReport.value.withReportableAsset(reportableAsset);
                             qrScannerModal.value.close();
-                        })
+                        });
                 })
                 .catch((error) => {
                     console.error(error);
@@ -55,12 +51,12 @@
 <template>
     <FormSection
         @activate="startQrScanner"
-        :class="[failureReport.hasReportableAsset() ? 'justify-between' : 'justify-center cursor-pointer active:bg-slate-50']"
+        :class="[failureReport.hasReportableAsset ? 'justify-between' : 'justify-center cursor-pointer active:bg-slate-50']"
     >
-        <ReportableAssetInfoBox v-if="failureReport.hasReportableAsset()" v-model="failureReport" />
+        <ReportableAssetInfoBox v-if="failureReport.hasReportableAsset" v-model="failureReport" />
 
-        <Button :variant="failureReport.hasReportableAsset() && !failureReport.error ? 'secondary' : 'primary'">
-            {{ failureReport.hasReportableAsset() ? t('report.load_again') : t('report.select_vehicle') }}
+        <Button :variant="failureReport.hasReportableAsset && !failureReport.error ? 'secondary' : 'primary'">
+            {{ failureReport.hasReportableAsset ? t('report.load_again') : t('report.select_vehicle') }}
         </Button>
     </FormSection>
     

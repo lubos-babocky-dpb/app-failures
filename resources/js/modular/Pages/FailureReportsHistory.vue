@@ -1,17 +1,15 @@
 <script setup>
-    import { FailureReport, FailuresUiVue } from '@dpb/failures-ui-vue';
-    import { onMounted, onUnmounted, ref } from 'vue';
+    import { onMounted, onUnmounted, ref, shallowRef } from 'vue';
     import ListItem from '../components/failure-history/ListItem.vue';
     import { Modal } from '@dpb/app-base-vue';
     import FailureReportDetail from '../components/failure-history/FailureReportDetail.vue';
     import { useRoute } from 'vue-router';
-    import { Gatekeeper } from '@dpb/gatekeeper';
+    import { failuresModule } from '@dpb/failures-core';
 
-    const failuresUiVue = new FailuresUiVue(Gatekeeper.apiClient);
     const route = useRoute();
-    const failureReports = ref([]);
+    const failureReports = shallowRef([]);
     const detailModal = ref(null);
-    const selectedFailureReport = ref(null);
+    const selectedFailureReport = shallowRef(null);
     let subscription;
 
     const showDetail = (failureReport) => {
@@ -20,20 +18,16 @@
     };
 
     onMounted(() => {
-        subscription = failuresUiVue.failureReportsRepository
-            .live()
+        subscription = failuresModule.failureReportsWatcher
             .subscribe(reports => {
                 failureReports.value = reports;
             });
 
         const uuid = route.params.uuid;
         if(uuid) {
-            failuresUiVue.failureReportsRepository
-                .get(uuid)
+            failuresModule.findFailureReport(uuid)
                 .then((failureReport) => {
-                    if(failureReport instanceof FailureReport) {
-                        showDetail(failureReport);
-                    }
+                    showDetail(failureReport);
                 });
         }
     });

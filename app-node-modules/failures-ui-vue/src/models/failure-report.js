@@ -1,5 +1,5 @@
 import { FailureType } from "./failure-type";
-import { ReportableAsset } from "./reportable-asset";
+import { ReportableAsset } from "@dpb/failures-core";
 
 export class FailureReport
 {
@@ -13,6 +13,7 @@ export class FailureReport
     createdAt;
 
     constructor({uuid, userUuid, reportableAsset, failureType, note, status, photos, createdAt} = {}) {
+        console.warn(`${this.constructor.name} is deprecated, use model from @dpb/failures-core`);
         this.uuid = uuid ?? crypto.randomUUID();
         this.userUuid = userUuid;
         this.reportableAsset = reportableAsset;

@@ -1,0 +1,13 @@
+{
+    "name": "@dpb/failures-core",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./src/index.js"
+    },
+    "peerDependencies": {},
+    "dependencies": {
+        "dexie": "^4.2.1"
+    }
+}

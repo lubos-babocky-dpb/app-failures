@@ -1,9 +1,10 @@
 <script setup>
-    import { FailureReport } from '@dpb/failures-ui-vue';
+    
     import { useI18n } from 'vue-i18n';
     import { LocalizedDateFormatter } from '../../formatters/localized-date-formatter';
     import { FailureStatusResolver } from '../../resolvers/failure-status-resolver';
     import { truncate } from '../../utils/string-utils';
+    import { FailureReport } from '@dpb/failures-core';
     
     const { t } = useI18n();
 

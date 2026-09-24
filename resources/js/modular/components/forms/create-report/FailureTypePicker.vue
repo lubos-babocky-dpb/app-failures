@@ -1,34 +1,22 @@
 <script setup>
-    import { FailuresUiVue } from '@dpb/failures-ui-vue';
-    import { Gatekeeper } from '@dpb/gatekeeper';
-    import { ref, watch } from 'vue';
-
-    const failuresUiVue = new FailuresUiVue(Gatekeeper.apiClient);
+    import { failuresModule } from '@dpb/failures-core';
+    import { shallowRef } from 'vue';
 
     const emit = defineEmits(['close']);
     const failureReport = defineModel();
-    const failureCategories = ref([]);
-    const selectedCategory = ref(null);
-    watch(failureCategories, (value) => console.log('FailureCateogries changed: ', value.filter(category => category.parent_uuid === null)));
-    const failureTypes = ref([]);
-    watch(failureTypes, (value) => console.log('FailureTypes changed: ', value));
+    const failureCategories = shallowRef([]);
+    const failureTypes = shallowRef([]);
+    const selectedCategory = shallowRef(null);
 
-    failuresUiVue.failureCategoriesRepository
-        .all()
-        .then((failureCategoryRecords) => {
-            failureCategories.value = failureCategoryRecords;
-        });
+    failuresModule.getAllFailureCategries()
+        .then(failureCategoryRecords => failureCategories.value = failureCategoryRecords);
 
-    failuresUiVue.failureTypesRepository
-        .all()
-        .then((failureTypeRecords) => {
-            failureTypes.value = failureTypeRecords;
-        });
-    
+    failuresModule.getAllFailureTypes()
+        .then(failureTypeRecords => failureTypes.value = failureTypeRecords);
+
     const selectFailureType = (failureType) => {
-        failureReport.value.failureType = failureType;
-
-        console.log('FailureReport updated: ', failureReport.value);
+        console.log(failureType);
+        failureReport.value = failureReport.value.withFailureType(failureType);
         emit('close');
     }
 </script>
@@ -38,14 +26,14 @@
         <button
             v-if="selectedCategory"
             type="button"
-            @click="selectedCategory = failureCategories.find(category => category.uuid === selectedCategory)?.parent_uuid ?? null"
+            @click="selectedCategory = failureCategories.find(category => category.uuid === selectedCategory)?.parentUuid ?? null"
             class="w-full p-5 text-xl font-black uppercase tracking-wide bg-[#e30613] text-white rounded-2xl mb-2 active:bg-[#c40510] shadow-md shrink-0"
         >
             ← Späť
         </button>
 
         <button
-            v-for="failureCategory in failureCategories.filter(failureCategory => failureCategory.parent_uuid === selectedCategory)"
+            v-for="failureCategory in failureCategories.filter(failureCategory => failureCategory.parentUuid === selectedCategory)"
             :key="failureCategory.uuid"
             type="button"
             @click="selectedCategory = failureCategory.uuid"

@@ -11,7 +11,7 @@
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                failureReport.value.attachPhoto(reader.result);
+                failureReport.value = failureReport.value.withPhoto(reader.result);
             }
             reader.readAsDataURL(file);
         }

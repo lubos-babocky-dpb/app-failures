@@ -6,6 +6,7 @@ export class ReportableAsset
         model,
         type,
     } = {}) {
+        console.warn(`${this.constructor.name} is deprecated, use model from @dpb/failures-core`);
         this.id = id;
         this.code = code;
         this.model = model;

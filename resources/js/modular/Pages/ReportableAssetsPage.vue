@@ -1,19 +1,16 @@
 <script setup>
-    import { ref, computed, onMounted, onUnmounted } from 'vue';
+    import { ref, computed, onMounted, onUnmounted, shallowRef } from 'vue';
     import QRCode from 'qrcode';
-    import { FailuresUiVue } from '@dpb/failures-ui-vue';
-    import { Gatekeeper } from '@dpb/gatekeeper';
+    import { failuresModule } from '@dpb/failures-core';
 
-    const failuresUiVue = new FailuresUiVue(Gatekeeper.apiClient);
-
-    const reportableAssets = ref([]);
+    const reportableAssets = shallowRef([]);
     const search = ref('');
 
     const qrCode = ref(null);
-    const selectedReportable = ref(null);
+    const selectedReportable = shallowRef(null);
     const isQrModalOpen = ref(false);
 
-    let subscription;
+    let reportableAssetSubscription;
 
     const filteredReportableAssets = computed(() => {
         const query = search.value.trim().toLowerCase();
@@ -33,7 +30,7 @@
     });
 
     const showQrCode = async (reportable) => {
-        const url = `https://localhost?vehicleId=${encodeURIComponent(reportable.id)}`;
+        const url = `https://localhost?vehicleId=${encodeURIComponent(reportable.uuid)}`;
         selectedReportable.value = reportable;
         qrCode.value = await QRCode.toDataURL(url, {
             width: 300,
@@ -117,18 +114,13 @@
     };
 
     onMounted(() => {
-        subscription = failuresUiVue
-            .reportableAssetsRepository
-            .live()
-            .subscribe({
-                next: data => {
-                    reportableAssets.value = data;
-                }
-            });
+        reportableAssetSubscription = failuresModule
+            .reportableAssetsWatcher
+            .subscribe({ next: data => reportableAssets.value = data });
     });
 
     onUnmounted(() => {
-        subscription?.unsubscribe();
+        reportableAssetSubscription?.unsubscribe();
     });
 </script>
 
@@ -186,7 +178,7 @@
                 <tbody class="divide-y divide-gray-100">
                     <tr
                         v-for="reportableAsset in filteredReportableAssets"
-                        :key="reportableAsset.id"
+                        :key="reportableAsset.uuid"
                         class="transition hover:bg-gray-50"
                     >
                         <td class="whitespace-nowrap px-5 py-4 font-medium text-gray-900">

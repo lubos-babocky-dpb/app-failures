@@ -11,6 +11,7 @@ export class FailuresUiVue
     #syncService = null;
 
     constructor(apiClient) {
+        console.warn('FailuresUiVue still in use!!!');
         this.#apiService = new FailuresApiService(apiClient);
         this.#syncService = new FailuresSyncService(this.#apiService);
     }

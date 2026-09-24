@@ -31,7 +31,7 @@ export class ApiClient {
         token = null,
         additionalHeaders = {}
     ) {
-        console.error('ApiClient from app-base called!!!');
+        console.warn('ApiClient from app-base called!!!');
         token ??= this.#bearerToken;
         const options = {
             method: endpoint.method,

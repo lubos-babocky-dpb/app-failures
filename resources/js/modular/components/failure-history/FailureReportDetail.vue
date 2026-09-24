@@ -1,8 +1,8 @@
 <script setup>
-    import { FailureReport } from '@dpb/failures-ui-vue';
+    import { FailureReport } from '@dpb/failures-core';
     import { useI18n } from 'vue-i18n';
-import { LocalizedDateFormatter } from '../../formatters/localized-date-formatter';
-import { FailureStatusResolver } from '../../resolvers/failure-status-resolver';
+    import { LocalizedDateFormatter } from '../../formatters/localized-date-formatter';
+    import { FailureStatusResolver } from '../../resolvers/failure-status-resolver';
     const { t } = useI18n();
 
     const props = defineProps({

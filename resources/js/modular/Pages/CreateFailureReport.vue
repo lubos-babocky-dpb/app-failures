@@ -1,42 +1,31 @@
 <script setup>
-    import { onMounted, ref, toRaw } from "vue";
-    import FailureTypeSelector from '../components/forms/create-report/FailureTypeSelector.vue';
-    import NoteBox from '../components/forms/create-report/NoteBox.vue';
-    import PhotoBox from '../components/forms/create-report/PhotoBox.vue';
-    import ReportableAssetSelector from '../components/forms/create-report/ReportableAssetSelector.vue';
-    import { FailureReport, FailuresUiVue } from "@dpb/failures-ui-vue";
+    import { onMounted, ref, shallowRef } from "vue";
     import { Button, Modal } from "@dpb/app-base-vue";
+    import { FailureReport, failuresModule } from "@dpb/failures-core";
+    import { FailureTypeSelector, NoteBox, PhotoBox, ReportableAssetSelector } from "../components/forms/create-report";
     import router from '../router.js';
-    import { Gatekeeper } from "@dpb/gatekeeper";
 
-    const failuresUiVue = new FailuresUiVue(Gatekeeper.apiClient);
     const debug = true;
-    const failureReport = ref(FailureReport.prepareNewFailureReport());
+
+    const failureReport = shallowRef(FailureReport.prepareNewFailureReport());
     const failureReportCreatedModal = ref(null);
 
-    const submitNewFailureReport = () => {
-        console.log(failuresUiVue);
-        failureReport.value.userUuid = Gatekeeper.deviceUuid;
-        failuresUiVue.createFailureReport(toRaw(failureReport.value))
+    const submitNewFailureReport = () => failuresModule
+            .createFailureReport(failureReport.value)
             .then(() => {
                 failureReport.value = FailureReport.prepareNewFailureReport();
                 failureReportCreatedModal.value.open();
             });
-    };
 
-    const goToFailureHistory = () => {
-        router.push('/history');
-    };
+    const goToFailureHistory = () => router.push('/history');
 
     //[L:] temp
     onMounted(() => {
         if(debug) {
-            failuresUiVue.reportableAssetsRepository.get(11).then((reportableAsset) => {
-                failureReport.value.reportableAsset = reportableAsset;
-            });
-            failuresUiVue.failureTypesRepository.get('a3e77725-3d50-4422-a4de-c9fd9f66dcfa').then((failureType) => {
-                failureReport.value.failureType = failureType;
-            });
+            failuresModule.findReportableAsset('58663019-9aef-11f1-83a3-0050568c1053')
+                .then(reportableAsset => failureReport.value = failureReport.value.withReportableAsset(reportableAsset));
+            failuresModule.findFailureType('089605f1-d8ff-462e-9bf0-a286b836b610')
+                .then(failureType => failureReport.value = failureReport.value.withFailureType(failureType));
         }
     });
 </script>
@@ -48,7 +37,7 @@
         <NoteBox v-model="failureReport" />
         <PhotoBox v-model="failureReport" />
         <Button
-            :disabled="!failureReport.hasFailureTypeAndReportableAsset()"
+            :disabled="!failureReport.hasFailureTypeAndReportableAsset"
             @click="submitNewFailureReport"
         >
             submit
