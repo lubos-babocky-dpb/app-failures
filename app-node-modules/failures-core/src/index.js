@@ -88,6 +88,7 @@ class FailuresModule
 
     async createFailureReport(failureReport) {
         console.info('Create FailureReport: ', failureReport);
+        this.#failureReportRepository.create(failureReport);
     }
 
     get reportableAssetsWatcher() {
