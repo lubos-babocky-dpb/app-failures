@@ -38,10 +38,12 @@ export class ApiService
     };
 
     async createFailureReport(failureReport) {
-        console.log(this.#apiClient);
-        return this.#apiClient.request(
+        console.log('Creating: ', failureReport);
+        const response = await this.#apiClient.request(
             Endpoints.FailureReportsEndpoints.CREATE,
             {failureReport: failureReport}
         );
+        console.warn(response);
+        return response;
     }
 }

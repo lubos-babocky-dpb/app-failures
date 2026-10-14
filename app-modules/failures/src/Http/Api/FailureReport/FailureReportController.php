@@ -13,4 +13,8 @@ class FailureReportController
     public function readAction() {
         return FailureReportResource::collection($this->failureReportRepository->readAll());
     }
+
+    public function createAction() {
+        dd(__METHOD__);
+    }
 }

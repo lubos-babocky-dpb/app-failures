@@ -43,3 +43,4 @@ class DataSync
 
 export const dataSync = new DataSync();
 export { SyncableRepository } from "./syncable-repository";
+export { syncableMixin } from "./syncable-mixin";

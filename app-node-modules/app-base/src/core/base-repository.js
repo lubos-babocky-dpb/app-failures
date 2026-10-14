@@ -47,4 +47,14 @@ export class BaseRepository
     async deleteByUuid(uuid) {
 
     }
+
+    async replaceAll(models) {
+        const table = await this.tablePromise;
+        const persistenceRows = models.map(model => this.mapper.toPersistence(model));
+        return await table.db.transaction('rw', table, async () => {
+            await table.clear();
+            await table.bulkPut(persistenceRows);
+            console.log(`table ${table.name} replaced with fresh data`);
+        })
+    }
 }

@@ -28,9 +28,8 @@ Route::prefix('v1')
         Route::get('/failure-category', [FailureCategoryController::class, 'readAction']);
         Route::get('/failure-type', [FailureTypeController::class, 'readAction']);
         Route::get('/failure-report', [FailureReportController::class, 'readAction']);
+        Route::post('/failure-report', [FailureReportController::class, 'createAction']);
 
-        //[LB:] Old routes:
-        Route::post('/failure-report', CreateFailureReportAction::class);
         //[LB:] Protected routes:
         Route::middleware(RoleMiddleware::using('admin'))
             ->group(function() {

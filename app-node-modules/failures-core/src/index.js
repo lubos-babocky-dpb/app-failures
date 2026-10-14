@@ -8,6 +8,8 @@ import { FailureTypeRepository } from "./domain/failure-type/failure-type-reposi
 import { FailureCategory } from "./domain/failure-category/failure-category";
 import { FailureCategoryRepository } from "./domain/failure-category/failure-category-repository";
 import { FailureReportRepository } from "./domain/failure-report/failure-report-repository";
+import { FailureReportSynchronizer } from "./domain/failure-report/failure-report-synchronizer";
+import { dataSync } from "../../data-sync/src";
 
 export { ReportableAsset } from "./domain/reportable-asset/reportable-asset";
 export { FailureReport } from "./domain/failure-report/failure-report";
@@ -108,6 +110,8 @@ export class FailuresServiceWorker
     #apiService;
     #reportableAssetRepository;
     #reportableAssetSynchronizer;
+    #failureReportRepository;
+    #failureReportSynchronizer;
 
     constructor(
         apiClient,
@@ -116,17 +120,33 @@ export class FailuresServiceWorker
         console.warn('FailuresSW!!!');
         this.#apiService = new ApiService(apiClient);
         this.#database = database;
+        console.log('Prepare repositories');
+        this.#prepareRepositories();
+        console.log('Prepare synchronizers');
+        this.#prepareSynchronizers();
+        console.log('Register synchronizers');
+        this.#registerSynchronizers();
+        console.info('All prepared!');
+    }
 
-        console.log('init repo');
-        this.#reportableAssetRepository = new ReportableAssetRepository(database.table('reportableAssets'));
-        console.log('repo inited, syncer now:');
+    #prepareRepositories() {
+        this.#reportableAssetRepository = new ReportableAssetRepository(this.#database.table('reportableAssets'));
+        this.#failureReportRepository = new FailureReportRepository(this.#database.table('failureReports'));
+    }
+
+    #prepareSynchronizers() {
         this.#reportableAssetSynchronizer = new ReportableAssetSynchronizer(this.#apiService, this.#reportableAssetRepository);
-        console.log('syncer inited', this.#reportableAssetSynchronizer);
+        this.#failureReportSynchronizer = new FailureReportSynchronizer(this.#apiService, this.#failureReportRepository);
+    }
+
+    #registerSynchronizers() {
+        dataSync.registerSyncService(ReportableAssetRepository.syncServiceId, this.#reportableAssetSynchronizer);
+        dataSync.registerSyncService(FailureReportRepository.syncServiceId, this.#failureReportSynchronizer);
     }
 
     syncInitialData() {
         console.log('failures-core:sw -> syncInitialData');
         this.#reportableAssetSynchronizer.sync();
+        this.#failureReportSynchronizer.sync();
     }
-
 }

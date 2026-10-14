@@ -1,13 +1,12 @@
 import { dataSync } from ".";
 import { SyncQueueRepository } from "./sync-queue-repository"
 
-export const syncableMixin = (Base, synchronizer, syncServiceId) => class extends Base {
+export const syncableMixin = (Base, syncServiceId) => class extends Base {
     #syncQueueRepository = new SyncQueueRepository();
     #syncServiceId = syncServiceId;
 
-    constructor(...args) {
-        super(...args);
-        dataSync.registerSyncService(syncServiceId, synchronizer);
+    static get syncServiceId() {
+        return syncServiceId;
     }
 
     async create(model) {

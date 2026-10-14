@@ -16,4 +16,10 @@ class FailureReportRepository implements FailureReportRepositoryInterface
             ->with(['reportable'])
             ->get();
     }
+
+    public function create(
+        FailureReport $failureReport
+    ): void {
+        $failureReport->save();
+    }
 }
